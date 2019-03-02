@@ -1,0 +1,23 @@
+*.py[co]
+*.swp
+*~
+
+# Eclipse IDE files
+.project
+.pydevproject
+.settings/
+
+# Sublime files
+*.sublime-*
+
+# Log files
+*.log.[0-9]
+*.log
+
+# Tox files
+.tox/
+
+# Build output
+build/
+dist/
+*.egg-info/

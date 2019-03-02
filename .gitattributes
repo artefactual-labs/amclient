@@ -1,0 +1,5 @@
+# Ensure that fixtures do not generate additional noise for those
+# doing code-review. 
+
+# vcrpy generated files.
+fixtures/vcr_cassettes/*.yaml linguist-generated=true
