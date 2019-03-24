@@ -1,3 +1,5 @@
+[![Travis CI](https://travis-ci.org/artefactual-labs/amclient.svg?branch=master)](https://travis-ci.org/artefactual-labs/amclient)
+
 # amclient
 
 The transfers/amclient.py script is a module and CLI that provides
