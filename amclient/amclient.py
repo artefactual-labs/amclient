@@ -30,34 +30,43 @@ try:
 except ImportError:
     from amclient import loggingconfig, defaults, amclientargs, errors, utils, version
 
-LOGGER = logging.getLogger('amclient')
+LOGGER = logging.getLogger("amclient")
 
 
 def b64decode_ts_location_browse(result):
     """Base64-decode the results of a call to SS GET
     /location/UUID/browse/.
     """
+
     def dec(thing):
         try:
-            thing = base64.b64decode(thing.encode('utf8'))
+            thing = base64.b64decode(thing.encode("utf8"))
         except UnicodeEncodeError:
-            LOGGER.warning('Failed to UTF8-encode output from GET call to SS'
-                           ' /location/UUID/browse/: %s', result)
+            LOGGER.warning(
+                "Failed to UTF8-encode output from GET call to SS"
+                " /location/UUID/browse/: %s",
+                result,
+            )
         except (binascii.Error, TypeError):
-            LOGGER.warning('Failed to base64-decode file or directory names in'
-                           ' output from GET call to SS'
-                           ' /location/UUID/browse/: %s', result)
+            LOGGER.warning(
+                "Failed to base64-decode file or directory names in"
+                " output from GET call to SS"
+                " /location/UUID/browse/: %s",
+                result,
+            )
         try:
-            return thing.decode('utf8')
+            return thing.decode("utf8")
         except ValueError:
-            LOGGER.debug('Unable to decode a transfer source component using'
-                         ' the UTF-8 codec; trying to guess the encoding...')
+            LOGGER.debug(
+                "Unable to decode a transfer source component using"
+                " the UTF-8 codec; trying to guess the encoding..."
+            )
             try:
                 import chardet
             except ImportError:
                 LOGGER.debug(defaults.UNDEC_MSG)
                 return defaults.UNDECODABLE
-            encoding = chardet.detect(thing).get('encoding')
+            encoding = chardet.detect(thing).get("encoding")
             if encoding:
                 try:
                     return thing.decode(encoding)
@@ -68,13 +77,17 @@ def b64decode_ts_location_browse(result):
             return defaults.UNDECODABLE
 
     try:
-        result['directories'] = [dec(d) for d in result['directories']]
-        result['entries'] = [dec(e) for e in result['entries']]
-        result['properties'] = {dec(key): val for key, val in
-                                result['properties'].items()}
+        result["directories"] = [dec(d) for d in result["directories"]]
+        result["entries"] = [dec(e) for e in result["entries"]]
+        result["properties"] = {
+            dec(key): val for key, val in result["properties"].items()
+        }
     except ValueError as error:
-        LOGGER.warning('GET call to SS /location/UUID/browse/ returned an'
-                       ' unrecognized data structure: %s', result)
+        LOGGER.warning(
+            "GET call to SS /location/UUID/browse/ returned an"
+            " unrecognized data structure: %s",
+            result,
+        )
         LOGGER.warning(error)
     return result
 
@@ -112,22 +125,22 @@ class AMClient(object):
     # from any failed calls to the AM or SS servers.
     def stdout(self, stuff):
         """Print to stdout, either as JSON or pretty-printed Python."""
-        if self.output_mode.lower() == 'json':
+        if self.output_mode.lower() == "json":
             print(json.dumps(stuff))
         else:
             pprint.pprint(stuff)
 
     def __getattr__(self, name):
-        if name.startswith('print_'):
+        if name.startswith("print_"):
             try:
-                method = name.replace('print_', '', 1)
+                method = name.replace("print_", "", 1)
                 res = getattr(self, method)()
                 # Shortening variable for PEP8 conformance.
                 err_lookup = errors.error_lookup
                 if isinstance(res, int):
-                    self.stdout(err_lookup
-                                .get(res,
-                                     err_lookup(errors.ERR_CLIENT_UNKNOWN)))
+                    self.stdout(
+                        err_lookup.get(res, err_lookup(errors.ERR_CLIENT_UNKNOWN))
+                    )
                 else:
                     self.stdout(res)
             except requests.exceptions.InvalidURL:
@@ -135,7 +148,7 @@ class AMClient(object):
             except BaseException:
                 self.stdout(errors.error_lookup(errors.ERR_CLIENT_UNKNOWN))
         else:
-            raise AttributeError('AMClient has no method {0}'.format(name))
+            raise AttributeError("AMClient has no method {0}".format(name))
 
     @staticmethod
     def version():
@@ -146,36 +159,32 @@ class AMClient(object):
         """Create JSON parameters for authentication in the request body to
         the Archivematica API.
         """
-        return {
-            'username': self.am_user_name,
-            'api_key': self.am_api_key,
-        }
+        return {"username": self.am_user_name, "api_key": self.am_api_key}
 
     def _ss_auth(self):
         """Create JSON parameters for authentication in the request body to
         the Storage Service API.
         """
-        return {
-            'username': self.ss_user_name,
-            'api_key': self.ss_api_key
-        }
+        return {"username": self.ss_user_name, "api_key": self.ss_api_key}
 
     def _am_auth_headers(self):
         """Generate a HTTP request header for the Archivematica API."""
-        return {"Authorization": "ApiKey {0}:{1}".format(self.am_user_name,
-                                                         self.am_api_key)}
+        return {
+            "Authorization": "ApiKey {0}:{1}".format(self.am_user_name, self.am_api_key)
+        }
 
     def _ss_auth_headers(self):
         """Generate a HTTP request header for Storage Service API."""
-        return {"Authorization": "ApiKey {0}:{1}".format(self.ss_user_name,
-                                                         self.ss_api_key)}
+        return {
+            "Authorization": "ApiKey {0}:{1}".format(self.ss_user_name, self.ss_api_key)
+        }
 
     def hide_unit(self, unit_uuid, unit_type):
         """GET <unit_type>/<unit_uuid>/delete/."""
         return utils._call_url_json(
-            '{}/api/{}/{}/delete/'.format(self.am_url, unit_type, unit_uuid),
+            "{}/api/{}/{}/delete/".format(self.am_url, unit_type, unit_uuid),
             params=self._am_auth(),
-            method=utils.METHOD_DELETE
+            method=utils.METHOD_DELETE,
         )
 
     def close_completed_transfers(self):
@@ -185,7 +194,7 @@ class AMClient(object):
                 --am-user-name=test \
                 e8f8a0fb157f08a260045f805455e144d8ad0a5b
         """
-        return self._close_completed_units('transfer')
+        return self._close_completed_units("transfer")
 
     def close_completed_ingests(self):
         """Close all completed ingests::
@@ -194,31 +203,33 @@ class AMClient(object):
                 --am-user-name=test \
                 e8f8a0fb157f08a260045f805455e144d8ad0a5b
         """
-        return self._close_completed_units('ingest')
+        return self._close_completed_units("ingest")
 
     def _close_completed_units(self, unit_type):
         """Close all completed transfers/ingests.  """
         try:
-            _completed_units = getattr(
-                self, 'completed_{0}s'.format(unit_type))().get('results')
+            _completed_units = getattr(self, "completed_{0}s".format(unit_type))().get(
+                "results"
+            )
         except AttributeError:
             _completed_units = None
         ret = defaultdict(list)
         if _completed_units is None:
-            msg = ('Something went wrong when attempting to retrieve the'
-                   ' completed {0}s.'.format(unit_type))
+            msg = (
+                "Something went wrong when attempting to retrieve the"
+                " completed {0}s.".format(unit_type)
+            )
             LOGGER.warning(msg)
         else:
             for unit_uuid in _completed_units:
-                ret['completed_{0}s'.format(unit_type)].append(unit_uuid)
+                ret["completed_{0}s".format(unit_type)].append(unit_uuid)
                 response = self.hide_unit(unit_uuid, unit_type)
                 if isinstance(response, int):
-                    ret['close_failed'].append(unit_uuid)
-                    LOGGER.warning('FAILED to close %s %s.',
-                                   unit_type, unit_uuid)
+                    ret["close_failed"].append(unit_uuid)
+                    LOGGER.warning("FAILED to close %s %s.", unit_type, unit_uuid)
                 else:
-                    ret['close_succeeded'].append(unit_uuid)
-                    LOGGER.info('Closed %s %s.', unit_type, unit_uuid)
+                    ret["close_succeeded"].append(unit_uuid)
+                    LOGGER.info("Closed %s %s.", unit_type, unit_uuid)
         return ret
 
     def completed_transfers(self):
@@ -229,7 +240,8 @@ class AMClient(object):
                 e8f8a0fb157f08a260045f805455e144d8ad0a5b
         """
         return utils._call_url_json(
-            '{}/api/transfer/completed'.format(self.am_url), self._am_auth())
+            "{}/api/transfer/completed".format(self.am_url), self._am_auth()
+        )
 
     def completed_ingests(self):
         """Return all completed ingests. GET /ingest/completed::
@@ -239,7 +251,8 @@ class AMClient(object):
                 e8f8a0fb157f08a260045f805455e144d8ad0a5b
         """
         return utils._call_url_json(
-            '{}/api/ingest/completed'.format(self.am_url), self._am_auth())
+            "{}/api/ingest/completed".format(self.am_url), self._am_auth()
+        )
 
     def unapproved_transfers(self):
         """Return all unapproved transfers. GET transfer/unapproved::
@@ -249,7 +262,8 @@ class AMClient(object):
                 --am-api-key=e8f8a0fb157f08a260045f805455e144d8ad0a5b
         """
         return utils._call_url_json(
-            '{}/api/transfer/unapproved'.format(self.am_url), self._am_auth())
+            "{}/api/transfer/unapproved".format(self.am_url), self._am_auth()
+        )
 
     def transferables(self, b64decode=True):
         """Return all transferable entities in the Storage Service.
@@ -262,12 +276,10 @@ class AMClient(object):
                 --transfer-source=7ea1eb0e-5f4e-42e0-836d-c9b4ab5692e1 \
                 --transfer-path=vagrant/archivematica-sampledata
         """
-        url = '{}/api/v2/location/{}/browse/'.format(
-            self.ss_url, self.transfer_source)
+        url = "{}/api/v2/location/{}/browse/".format(self.ss_url, self.transfer_source)
         params = self._ss_auth()
         if self.transfer_path:
-            params['path'] = \
-                base64.b64encode(utils.fsencode(self.transfer_path))
+            params["path"] = base64.b64encode(utils.fsencode(self.transfer_path))
         result = utils._call_url_json(url, params)
         if b64decode:
             return b64decode_ts_location_browse(result)
@@ -277,33 +289,33 @@ class AMClient(object):
         """SS GET /api/v2/file/?<GET_PARAMS>."""
         payload = self._ss_auth()
         payload.update(params)
-        return utils._call_url_json(
-            '{}/api/v2/file/'.format(self.ss_url), payload)
+        return utils._call_url_json("{}/api/v2/file/".format(self.ss_url), payload)
 
     def get_package_details(self):
         """SS GET /api/v2/file/<uuid>. Retrieve the details of a specific
         package given a package uuid.
         """
         return utils._call_url_json(
-            '{0}/api/v2/file/{1}'.format(self.ss_url, self.package_uuid),
-            headers=self._ss_auth_headers())
+            "{0}/api/v2/file/{1}".format(self.ss_url, self.package_uuid),
+            headers=self._ss_auth_headers(),
+        )
 
     def get_next_package_page(self, next_path):
         """SS GET  /api/v2/file/?<GET_PARAMS> using the next URL from
         previous responses, which includes the auth. parameters.
         """
-        return utils._call_url_json('{}{}'.format(self.ss_url, next_path), {})
+        return utils._call_url_json("{}{}".format(self.ss_url, next_path), {})
 
     def aips(self, params=None):
         """Retrieve the details of a specific AIP."""
-        final_params = {'package_type': 'AIP'}
+        final_params = {"package_type": "AIP"}
         if params:
             final_params.update(params)
         return self.get_all_packages(final_params)
 
     def dips(self, params=None):
         """Retrieve the details of a specific DIP."""
-        final_params = {'package_type': 'DIP'}
+        final_params = {"package_type": "DIP"}
         if params:
             final_params.update(params)
         return self.get_all_packages(final_params)
@@ -319,11 +331,10 @@ class AMClient(object):
         else:
             response = self.get_package(params)
         if not response:
-            raise Exception('Error connecting to the SS')
-        packages = packages + response['objects']
-        if response['meta']['next']:
-            packages = self.get_all_packages(
-                params, packages, response['meta']['next'])
+            raise Exception("Error connecting to the SS")
+        packages = packages + response["objects"]
+        if response["meta"]["next"]:
+            packages = self.get_all_packages(params, packages, response["meta"]["next"])
         return packages
 
     def get_all_compressed_aips(self):
@@ -335,11 +346,11 @@ class AMClient(object):
         """
         compressed_aips = {}
         for aip in self.aips():
-            if aip['status'] == u"UPLOADED":
+            if aip["status"] == "UPLOADED":
                 path = aip["current_full_path"]
                 compressed = self.find_compressed(path)
                 if compressed:
-                    compressed_aips[aip['uuid']] = aip
+                    compressed_aips[aip["uuid"]] = aip
         return compressed_aips
 
     def find_compressed(self, path):
@@ -349,8 +360,7 @@ class AMClient(object):
         compressed_file_ext = [".7z"]
         uncompressed_file_ext = ""
         file_name, file_extension = os.path.splitext(path)
-        LOGGER.debug("Found filename %s with extension %s", file_name,
-                     file_extension)
+        LOGGER.debug("Found filename %s with extension %s", file_name, file_extension)
         file_extension = file_extension.strip()
         if file_extension in compressed_file_ext:
             return True
@@ -370,50 +380,56 @@ class AMClient(object):
         area. Please inform if this is inaccurate.
         """
         _dips = self.dips()
-        return [d for d in _dips if
-                d['current_path'].endswith(self.aip_uuid)]
+        return [d for d in _dips if d["current_path"].endswith(self.aip_uuid)]
 
     def aips2dips(self):
         """Get all AIP UUIDs and map them to their DIP UUIDs, if any."""
         _dips = self.dips()
-        return {a['uuid']: [d['uuid'] for d in _dips
-                            if d['current_path'].endswith(a['uuid'])]
-                for a in self.aips()}
+        return {
+            a["uuid"]: [
+                d["uuid"] for d in _dips if d["current_path"].endswith(a["uuid"])
+            ]
+            for a in self.aips()
+        }
 
     def download_package(self, uuid):
         """Download the package from SS by UUID."""
-        url = '{}/api/v2/file/{}/download/'.format(self.ss_url, uuid)
+        url = "{}/api/v2/file/{}/download/".format(self.ss_url, uuid)
         response = requests.get(url, params=self._ss_auth(), stream=True)
         if response.status_code == 200:
             try:
                 local_filename = re.findall(
-                    'filename="(.+)"',
-                    response.headers['content-disposition'])[0]
+                    'filename="(.+)"', response.headers["content-disposition"]
+                )[0]
             except KeyError:
                 # NOTE: assuming that packages are always stored as .7z
-                local_filename = 'package-{}.7z'.format(uuid)
-            if getattr(self, 'directory', None):
+                local_filename = "package-{}.7z".format(uuid)
+            if getattr(self, "directory", None):
                 dir_ = self.directory
                 if os.path.isdir(dir_):
                     local_filename = os.path.join(dir_, local_filename)
                 else:
                     LOGGER.warning(
-                        'There is no directory %s; saving %s to %s instead',
-                        dir_, local_filename, os.getcwd())
-            with open(local_filename, 'wb') as file_:
+                        "There is no directory %s; saving %s to %s instead",
+                        dir_,
+                        local_filename,
+                        os.getcwd(),
+                    )
+            with open(local_filename, "wb") as file_:
                 for chunk in response.iter_content(chunk_size=1024):
                     if chunk:
                         file_.write(chunk)
             return local_filename
         else:
-            LOGGER.warning('Unable to download package %s', uuid)
+            LOGGER.warning("Unable to download package %s", uuid)
 
     def get_pipelines(self):
         """GET Archivematica Pipelines (dashboard instances from the storage
         service.
         """
-        return utils._call_url_json('{0}/api/v2/pipeline/'.format(self.ss_url),
-                                    headers=self._ss_auth_headers())
+        return utils._call_url_json(
+            "{0}/api/v2/pipeline/".format(self.ss_url), headers=self._ss_auth_headers()
+        )
 
     def get_transfer_status(self):
         """Given a Transfer UUID, GET the transfer status.
@@ -430,17 +446,18 @@ class AMClient(object):
         application.
         """
         return utils._call_url_json(
-            '{0}/api/transfer/status/{1}/'.format(self.am_url,
-                                                  self.transfer_uuid),
-            headers=self._am_auth_headers())
+            "{0}/api/transfer/status/{1}/".format(self.am_url, self.transfer_uuid),
+            headers=self._am_auth_headers(),
+        )
 
     def get_ingest_status(self):
         """GET ingest status if there is an ingest in progress in the
         Archivematica pipeline.
         """
         return utils._call_url_json(
-            '{0}/api/ingest/status/{1}/'.format(self.am_url, self.sip_uuid),
-            headers=self._am_auth_headers())
+            "{0}/api/ingest/status/{1}/".format(self.am_url, self.sip_uuid),
+            headers=self._am_auth_headers(),
+        )
 
     def get_processing_config(self, assume_json=False):
         """GET a processing configuration file from an Archivematica instance.
@@ -451,11 +468,12 @@ class AMClient(object):
         return the default processing config from the AM server.
         """
         return utils._call_url_json(
-            '{0}/api/processing-configuration/{1}'
-            .format(self.am_url,
-                    self.processing_config),
+            "{0}/api/processing-configuration/{1}".format(
+                self.am_url, self.processing_config
+            ),
             headers=self._am_auth_headers(),
-            assume_json=assume_json)
+            assume_json=assume_json,
+        )
 
     def approve_transfer(self):
         """Approve a transfer in the Archivematica Pipeline.
@@ -470,13 +488,17 @@ class AMClient(object):
         from. The directory can be found via the get_transfer_status API
         call.
         """
-        url = '{0}/api/transfer/approve/'.format(self.am_url)
-        params = {"type": self.transfer_type,
-                  "directory": utils.fsencode(self.transfer_directory)}
-        return utils._call_url_json(url,
-                                    headers=self._am_auth_headers(),
-                                    params=params,
-                                    method=utils.METHOD_POST)
+        url = "{0}/api/transfer/approve/".format(self.am_url)
+        params = {
+            "type": self.transfer_type,
+            "directory": utils.fsencode(self.transfer_directory),
+        }
+        return utils._call_url_json(
+            url,
+            headers=self._am_auth_headers(),
+            params=params,
+            method=utils.METHOD_POST,
+        )
 
     def reingest_aip(self):
         """Initiate the reingest of an AIP via the Storage Service given the
@@ -488,15 +510,18 @@ class AMClient(object):
             * OBJECTS (partial re-ingest)
             * FULL (full re-ingest)
         """
-        params = {'pipeline': self.pipeline_uuid,
-                  'reingest_type': self.reingest_type,
-                  'processing_config': self.processing_config}
-        url = "{0}/api/v2/file/{1}/reingest/"\
-            .format(self.ss_url, self.aip_uuid)
-        return utils._call_url_json(url,
-                                    headers=self._ss_auth_headers(),
-                                    params=json.dumps(params),
-                                    method=utils.METHOD_POST)
+        params = {
+            "pipeline": self.pipeline_uuid,
+            "reingest_type": self.reingest_type,
+            "processing_config": self.processing_config,
+        }
+        url = "{0}/api/v2/file/{1}/reingest/".format(self.ss_url, self.aip_uuid)
+        return utils._call_url_json(
+            url,
+            headers=self._ss_auth_headers(),
+            params=json.dumps(params),
+            method=utils.METHOD_POST,
+        )
 
     def download_dip(self):
         return self.download_package(self.dip_uuid)
@@ -508,30 +533,33 @@ class AMClient(object):
         """List all Storage Service locations."""
         params = {}
         url = "{0}/api/v2/location/".format(self.ss_url)
-        return utils._call_url_json(url,
-                                    headers=self._ss_auth_headers(),
-                                    params=json.dumps(params),
-                                    method=utils.METHOD_GET)
+        return utils._call_url_json(
+            url,
+            headers=self._ss_auth_headers(),
+            params=json.dumps(params),
+            method=utils.METHOD_GET,
+        )
 
     def create_package(self):
         """Create a transfer using the new API v2 package endpoint."""
         url = "{}/api/v2beta/package/".format(self.am_url)
-        transfer_source = getattr(self, 'transfer_source', None)
+        transfer_source = getattr(self, "transfer_source", None)
         if not transfer_source:
             path = self.transfer_directory
         else:
-            path = "{}:{}"\
-                .format(self.transfer_source, self.transfer_directory)
+            path = "{}:{}".format(self.transfer_source, self.transfer_directory)
         b64path = base64.b64encode(utils.fsencode(path))
         params = {
-            'name': self.transfer_name,
-            'path': b64path.decode(),
+            "name": self.transfer_name,
+            "path": b64path.decode(),
             "processing_config": self.processing_config,
         }
-        return utils._call_url_json(url,
-                                    headers=self._am_auth_headers(),
-                                    params=json.dumps(params),
-                                    method=utils.METHOD_POST)
+        return utils._call_url_json(
+            url,
+            headers=self._am_auth_headers(),
+            params=json.dumps(params),
+            method=utils.METHOD_POST,
+        )
 
     def extract_file(self):
         """Extract a file, relative to an AIP's path. If a filename and
@@ -539,24 +567,28 @@ class AMClient(object):
         file relative to the directory the script is invoked from.
         """
         self.output_mode = "".format(None)
-        url = "{0}/api/v2/file/{1}/extract_file/?relative_path_to_file={2}"\
-            .format(self.ss_url, self.package_uuid, self.relative_path)
+        url = "{0}/api/v2/file/{1}/extract_file/?relative_path_to_file={2}".format(
+            self.ss_url, self.package_uuid, self.relative_path
+        )
         response = requests.get(url, params=self._ss_auth(), stream=True)
         if response.status_code == 200:
-            local_filename = getattr(self, 'saveas_filename', None)
+            local_filename = getattr(self, "saveas_filename", None)
             if not local_filename:
                 local_filename = re.findall(
-                    'filename="(.+)"',
-                    response.headers['content-disposition'])[0]
-            if getattr(self, 'directory', None):
+                    'filename="(.+)"', response.headers["content-disposition"]
+                )[0]
+            if getattr(self, "directory", None):
                 dir_ = self.directory
                 if os.path.isdir(dir_):
                     local_filename = os.path.join(dir_, local_filename)
                 else:
                     LOGGER.warning(
-                        'There is no directory %s; saving %s to %s instead',
-                        dir_, local_filename, os.getcwd())
-            with open(local_filename, 'wb') as file_:
+                        "There is no directory %s; saving %s to %s instead",
+                        dir_,
+                        local_filename,
+                        os.getcwd(),
+                    )
+            with open(local_filename, "wb") as file_:
                 for chunk in response.iter_content(chunk_size=1024):
                     if chunk:
                         file_.write(chunk)
@@ -575,15 +607,15 @@ def main():
     loggingconfig.setup(args.log_level, args.log_file)
     am_client = AMClient(**vars(args))
     try:
-        getattr(
-            am_client, 'print_{0}'.format(args.subcommand.replace('-', '_')))
+        getattr(am_client, "print_{0}".format(args.subcommand.replace("-", "_")))
         print(
-            "{}: Log file can be accessed at: {}"
-            .format(__package__, args.log_file), file=sys.stderr)
+            "{}: Log file can be accessed at: {}".format(__package__, args.log_file),
+            file=sys.stderr,
+        )
     except AttributeError:
         argparser.print_help()
         sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
