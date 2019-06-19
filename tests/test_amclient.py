@@ -503,9 +503,7 @@ class TestAMClient(unittest.TestCase):
         pipelines = objects[0]["uuid"]
         resource_uri = objects[0]["resource_uri"]
         assert amclient.is_uuid(pipelines)
-        assert (
-            resource_uri == "/api/v2/pipeline/f914af05-c7d2" "-4611-b2eb-61cd3426d9d2/"
-        )
+        assert resource_uri == "/api/v2/pipeline/f914af05-c7d2-4611-b2eb-61cd3426d9d2/"
         assert isinstance(objects, list)
         assert len(objects) > 0
 
@@ -532,14 +530,14 @@ class TestAMClient(unittest.TestCase):
             am_api_key=AM_API_KEY,
             am_user_name=AM_USER_NAME,
             am_url=AM_URL,
-            transfer_uuid="63fcc1b0-f83d-47e6" "-ac9d-a8f8d1fc2ab9",
+            transfer_uuid="63fcc1b0-f83d-47e6-ac9d-a8f8d1fc2ab9",
         ).get_transfer_status()
 
         status = response["status"]
         message = response["message"]
         assert status == "COMPLETE"
         assert message == (
-            "Fetched status for 63fcc1b0-f83d-47e6" "-ac9d-a8f8d1fc2ab9 successfully."
+            "Fetched status for 63fcc1b0-f83d-47e6-ac9d-a8f8d1fc2ab9 successfully."
         )
 
     @vcr.use_cassette("fixtures/vcr_cassettes/transfer_status_invalid_uuid.yaml")
@@ -551,7 +549,7 @@ class TestAMClient(unittest.TestCase):
             am_api_key=AM_API_KEY,
             am_user_name=AM_USER_NAME,
             am_url=AM_URL,
-            transfer_uuid="7bffc8f7-baad-f00d" "-8120-b1c51c2ab5db",
+            transfer_uuid="7bffc8f7-baad-f00d-8120-b1c51c2ab5db",
         ).get_transfer_status()
         message = response["message"]
         message_type = response["type"]
@@ -570,12 +568,12 @@ class TestAMClient(unittest.TestCase):
             am_api_key=AM_API_KEY,
             am_user_name=AM_USER_NAME,
             am_url=AM_URL,
-            sip_uuid="23129471-09e3-467e-" "88b6-eb4714afb5ac",
+            sip_uuid="23129471-09e3-467e-88b6-eb4714afb5ac",
         ).get_ingest_status()
         message = response["message"]
         message_type = response["type"]
         assert message == (
-            "Fetched status for 23129471-09e3-467e-" "88b6-eb4714afb5ac successfully."
+            "Fetched status for 23129471-09e3-467e-88b6-eb4714afb5ac successfully."
         )
         assert message_type == "SIP"
 
@@ -588,7 +586,7 @@ class TestAMClient(unittest.TestCase):
             am_api_key=AM_API_KEY,
             am_user_name=AM_USER_NAME,
             am_url=AM_URL,
-            sip_uuid="63fcc1b0-f83d-47e6-" "ac9d-a8f8d1fc2ab9",
+            sip_uuid="63fcc1b0-f83d-47e6-ac9d-a8f8d1fc2ab9",
         ).get_ingest_status()
         assert (
             errors.error_lookup(response)
@@ -788,7 +786,7 @@ class TestAMClient(unittest.TestCase):
         feedback from the v2/beta endpoint so we just check that we do receive
         a UUID as anticipated.
         """
-        path = "/archivematica/archivematica-sampledata/SampleTransfers/" "DemoTransfer"
+        path = "/archivematica/archivematica-sampledata/SampleTransfers/DemoTransfer"
         response = amclient.AMClient(
             am_api_key=AM_API_KEY,
             am_user_name=AM_USER_NAME,
@@ -821,6 +819,23 @@ class TestAMClient(unittest.TestCase):
             uuid.UUID(uuid_, version=4)
         except ValueError:
             assert False
+        # Provide a test for a non-standard transfer type
+        path = "/archivematica/archivematica-sampledata/SampleTransfers/BagTransfer"
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY,
+            am_user_name=AM_USER_NAME,
+            am_url=AM_URL,
+            transfer_source="d1184f7f-d755-4c8d-831a-a3793b88f760",
+            transfer_directory=path,
+            transfer_name="amclient-transfer",
+            transfer_type="unzipped bag",
+            processing_config="automated",
+        ).create_package()
+        uuid_ = response.get("id", "")
+        try:
+            uuid.UUID(uuid_, version=4)
+        except ValueError:
+            assert False
 
     @vcr.use_cassette("fixtures/vcr_cassettes/test_extract_individual_file.yaml")
     def test_extract_individual_file(self):
@@ -830,7 +845,7 @@ class TestAMClient(unittest.TestCase):
         with TmpDir(TMP_DIR):
             filename_to_test = "bird.mp3"
             package_uuid = "2ad1bf0d-23fa-44e0-a128-9feadfe22c42"
-            path = "amclient-transfer_1-{}/" "data/objects/{}".format(
+            path = "amclient-transfer_1-{}/data/objects/{}".format(
                 package_uuid, filename_to_test
             )
             filename = "bird_download.mp3"

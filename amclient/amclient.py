@@ -552,6 +552,7 @@ class AMClient(object):
         params = {
             "name": self.transfer_name,
             "path": b64path.decode(),
+            "type": self.transfer_type,
             "processing_config": self.processing_config,
         }
         return utils._call_url_json(

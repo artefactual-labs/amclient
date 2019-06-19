@@ -200,7 +200,7 @@ SUBCOMMANDS = (
     ),
     SubCommand(
         name="aip2dips",
-        help=("Print the AIP with AIP_UUID along with its corresponding " "DIP(s)."),
+        help=("Print the AIP with AIP_UUID along with its corresponding DIP(s)."),
         args=(AIP_UUID, SS_API_KEY),
         opts=(SS_USER_NAME, SS_URL, OUTPUT_MODE),
     ),
@@ -273,6 +273,7 @@ SUBCOMMANDS = (
             AM_URL,
             TRANSFER_SOURCE_OPT,
             TRANSFER_NAME,
+            TRANSFER_TYPE,
             PROCESSING_CONFIG,
             OUTPUT_MODE,
         ),
