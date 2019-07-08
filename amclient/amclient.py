@@ -540,6 +540,18 @@ class AMClient(object):
             method=utils.METHOD_GET,
         )
 
+    def get_jobs(self):
+        """Get a list of jobs ran for a unit (transfer or ingest)."""
+        url = "{}/api/v2beta/jobs/{}".format(self.am_url, self.unit_uuid)
+        params = {}
+        for attribute in ["microservice", "link_uuid", "name"]:
+            value = getattr(self, "job_{}".format(attribute), None)
+            if value is not None:
+                params[attribute] = value
+        return utils._call_url_json(
+            url, headers=self._am_auth_headers(), params=params, method=utils.METHOD_GET
+        )
+
     def create_package(self):
         """Create a transfer using the new API v2 package endpoint."""
         url = "{}/api/v2beta/package/".format(self.am_url)

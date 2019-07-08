@@ -863,6 +863,65 @@ class TestAMClient(unittest.TestCase):
             assert os.path.getsize(file_) == int(response.get("Content-Length", 0))
             assert filename_to_test in response.get("Content-Disposition", "")
 
+    @vcr.use_cassette("fixtures/vcr_cassettes/jobs.yaml")
+    def test_get_jobs(self):
+        """Test getting the jobs ran for a transfer"""
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY,
+            am_user_name=AM_USER_NAME,
+            am_url=AM_URL,
+            unit_uuid="ca480d94-892c-4d99-bbb1-290698406571",
+        ).get_jobs()
+        assert isinstance(response, list)
+        assert len(response) > 0
+        expected_job_attributes = [
+            "link_uuid",
+            "microservice",
+            "name",
+            "status",
+            "tasks",
+            "uuid",
+        ]
+        expected_task_attributes = ["exit_code", "uuid"]
+        for job in response:
+            assert sorted(job.keys()) == expected_job_attributes
+            for task in job["tasks"]:
+                assert sorted(task.keys()) == expected_task_attributes
+        # Test filtering jobs by microservice
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY,
+            am_user_name=AM_USER_NAME,
+            am_url=AM_URL,
+            unit_uuid="ca480d94-892c-4d99-bbb1-290698406571",
+            job_microservice="Clean up names",
+        ).get_jobs()
+        expected_jobs = [
+            "Sanitize Transfer name",
+            "Sanitize object's file and directory names",
+        ]
+        microservice_jobs = sorted([job["name"] for job in response])
+        assert microservice_jobs == expected_jobs
+        # Test filtering jobs by link_uuid
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY,
+            am_user_name=AM_USER_NAME,
+            am_url=AM_URL,
+            unit_uuid="ca480d94-892c-4d99-bbb1-290698406571",
+            job_link_uuid="87e7659c-d5de-4541-a09c-6deec966a0c0",
+        ).get_jobs()
+        assert len(response) == 1
+        assert response[0]["name"] == "Verify mets_structmap.xml compliance"
+        # Test filtering jobs by name
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY,
+            am_user_name=AM_USER_NAME,
+            am_url=AM_URL,
+            unit_uuid="ca480d94-892c-4d99-bbb1-290698406571",
+            job_name="Verify metadata directory checksums",
+        ).get_jobs()
+        assert len(response) == 1
+        assert response[0]["name"] == "Verify metadata directory checksums"
+
 
 if __name__ == "__main__":
     unittest.main()
