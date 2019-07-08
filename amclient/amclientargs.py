@@ -19,6 +19,7 @@ AIP_UUID = Arg(name="aip_uuid", help="UUID of the target AIP", type=None)
 DIP_UUID = Arg(name="dip_uuid", help="UUID of the target DIP", type=None)
 SIP_UUID = Arg(name="sip_uuid", help="UUID of the target SIP", type=None)
 TRANSFER_UUID = Arg(name="transfer_uuid", help="UUID of the target Transfer", type=None)
+UNIT_UUID = Arg(name="unit_uuid", help="UUID of the target unit", type=None)
 AM_API_KEY = Arg(name="am_api_key", help="Archivematica API key", type=None)
 SS_API_KEY = Arg(name="ss_api_key", help="Storage Service API key", type=None)
 TRANSFER_SOURCE = Arg(name="transfer_source", help="Transfer source UUID", type=None)
@@ -131,6 +132,23 @@ TRANSFER_NAME = Opt(
     help="A name for the transfer",
     default="amclient-transfer",
     type=None,
+)
+JOB_MICROSERVICE = Opt(
+    name="job-microservice",
+    metavar="JOBMICROSERVICE",
+    help="Filter by microservice",
+    default=None,
+    type=None,
+)
+JOB_LINK_UUID = Opt(
+    name="job-link-uuid",
+    metavar="JOBLINKUUID",
+    help="Filter by job link UUID",
+    default=None,
+    type=None,
+)
+JOB_NAME = Opt(
+    name="job-name", metavar="JOBNAME", help="Filter by name", default=None, type=None
 )
 
 # Sub-command configuration: give them a name, help text, a tuple of ``Arg``
@@ -283,6 +301,19 @@ SUBCOMMANDS = (
         help="Extract a file from a package in the storage service.",
         args=(SS_API_KEY, PACKAGE_UUID, RELATIVE_PATH),
         opts=(SS_USER_NAME, SS_URL, DIRECTORY, SAVEAS_FILENAME),
+    ),
+    SubCommand(
+        name="get-jobs",
+        help="Retrieve a list of jobs ran for a unit (transfer or ingest).",
+        args=(AM_API_KEY, UNIT_UUID),
+        opts=(
+            AM_USER_NAME,
+            AM_URL,
+            JOB_MICROSERVICE,
+            JOB_LINK_UUID,
+            JOB_NAME,
+            OUTPUT_MODE,
+        ),
     ),
 )
 
