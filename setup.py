@@ -38,6 +38,7 @@ setup(
     version=find_version("amclient/version.py"),
     description="Archivematica API client library.",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/artefactual-labs/amclient/",
     author="Artefactual",
     author_email="info@artefactual.com",

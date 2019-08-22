@@ -2,21 +2,24 @@
 
 .PHONY: clean package package-deps package-source package-upload package-wheel
 
-package-deps:		## Upgrade dependencies for packaging
+package-deps:                                   ## Upgrade dependencies for packaging
 	python3 -m pip install --upgrade twine wheel
 
-package-source:		## Package the source code
+package-source:                                 ## Package the source code
 	python3 setup.py sdist
 
-package-wheel: package-deps		## Package a Python wheel
+package-wheel: package-deps                     ## Package a Python wheel
 	python3 setup.py bdist_wheel --universal
 
-package-upload: package-deps package-source package-wheel	## Upload package
+package-check: package-source package-wheel     ## Check the distribution is valid
+	twine check dist/*
+
+package-upload: package-deps package-check      ## Upload package
 	twine upload dist/* --repository-url https://upload.pypi.org/legacy/
 
 package: package-upload
 
-clean:	## Clean the package directory
+clean:  ## Clean the package directory
 	rm -rf amclient.egg-info/
 	rm -rf build/
 	rm -rf dist/
