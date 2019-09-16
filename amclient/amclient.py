@@ -629,12 +629,50 @@ class AMClient(object):
                         file_.write(chunk)
             return response.headers
 
+    def list_location_purposes(self):
+        """List valid location purposes in the Storage Service."""
+        return {
+            "AR": "AIP_RECOVERY",
+            "AS": "AIP_STORAGE",
+            "CP": "CURRENTLY_PROCESSING",
+            "DS": "DIP_STORAGE",
+            "SD": "SWORD_DEPOSIT",
+            "SS": "STORAGE_SERVICE_INTERNAL",
+            "BL": "BACKLOG",
+            "TS": "TRANSFER_SOURCE",
+            "RP": "REPLICATOR",
+        }
+
+    def create_location(self):
+        """Create a new location in the Storage Service."""
+        if not self.location_purpose.upper() in self.list_location_purposes():
+            return {
+                "error": "location purpose not permitted",
+                "valid_purposes": self.list_location_purposes(),
+            }
+        url = "{0}/api/v2/location/".format(self.ss_url)
+        params = {
+            "description": self.location_description
+            if self.location_description
+            else "",
+            "pipeline": ["/api/v2/pipeline/{}/".format(self.pipeline_uuid)],
+            "space": "/api/v2/space/{}/".format(self.space_uuid),
+            "default": self.default if self.default else False,
+            "purpose": self.location_purpose,
+            "relative_path": self.space_relative_path,
+        }
+        return utils._call_url_json(
+            url,
+            params=json.dumps(params),
+            method=utils.METHOD_POST,
+            headers=self._ss_auth_headers(),
+        )
+
 
 def main():
     """Primary entry point of amclient.py"""
     argparser = amclientargs.get_parser()
-    # Python 2.x, ensures that help is printed consistently like we see in
-    # Python 3.x.
+    # Python 2.x, ensures that help is printed consistently like we see in Python 3.x.
     if len(sys.argv) < 2:
         argparser.print_help()
         sys.exit(0)

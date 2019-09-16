@@ -12,8 +12,7 @@ try:
 except ImportError:
     from amclient import defaults, version
 
-
-# Reusable argument constants (for CLI).
+# Reusable argument constants (for CLI), E.g. arguments without reasonable defaults and are required to complete an API call.
 Arg = namedtuple("Arg", ["name", "help", "type"])
 AIP_UUID = Arg(name="aip_uuid", help="UUID of the target AIP", type=None)
 DIP_UUID = Arg(name="dip_uuid", help="UUID of the target DIP", type=None)
@@ -37,8 +36,16 @@ RELATIVE_PATH = Arg(
     help="Relative path to a file in an Archivematica package",
     type=None,
 )
-
-# Reusable option constants (for CLI).
+SPACE_UUID = Arg(
+    name="space_uuid", help="UUID of the space to add the location to", type=None
+)
+SPACE_RELATIVE_PATH = Arg(
+    name="space_relative_path", help="Path relative to a storage space", type=None
+)
+LOCATION_PURPOSE = Arg(
+    name="location_purpose", help="Purpose of storage space location", type=None
+)
+# Reusable option constants (for CLI), E.g. arguments with reasonable defaults or are not required to complete an API call.
 Opt = namedtuple("Opt", ["name", "metavar", "help", "default", "type"])
 AM_URL = Opt(
     name="am-url",
@@ -149,6 +156,20 @@ JOB_LINK_UUID = Opt(
 )
 JOB_NAME = Opt(
     name="job-name", metavar="JOBNAME", help="Filter by name", default=None, type=None
+)
+LOCATION_DESCRIPTION = Opt(
+    name="location-description",
+    metavar="LOCATIONDESCRIPTION",
+    help="Description for the storage location",
+    default=None,
+    type=None,
+)
+DEFAULT = Opt(
+    name="default",
+    metavar="DEFAULT",
+    help="Toggle setting to default",
+    default=False,
+    type=None,
 )
 
 # Sub-command configuration: give them a name, help text, a tuple of ``Arg``
@@ -314,6 +335,18 @@ SUBCOMMANDS = (
             JOB_NAME,
             OUTPUT_MODE,
         ),
+    ),
+    SubCommand(
+        name="create-location",
+        help="Create a new location in the Storage Service for a given space.",
+        args=(
+            PIPELINE_UUID,
+            SPACE_UUID,
+            LOCATION_PURPOSE,
+            SPACE_RELATIVE_PATH,
+            SS_API_KEY,
+        ),
+        opts=(SS_USER_NAME, SS_URL, LOCATION_DESCRIPTION, DEFAULT, OUTPUT_MODE),
     ),
 )
 
