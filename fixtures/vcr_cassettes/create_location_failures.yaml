@@ -1,0 +1,88 @@
+interactions:
+- request:
+    body: '{"description": "AM Client unit test description", "pipeline": ["/api/v2/pipeline/d6aeb4e0-e836-4768-8225-26e5720950d3/"],
+      "space": "/api/v2/space/badf00d3-c759-443f-95c9-0fa813034731/", "default": false,
+      "purpose": "AS", "relative_path": "this/is/a/path"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - ApiKey test:5de62f6f4817f903dcfac47fa5cffd44685a2cf2
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '256'
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: http://192.168.168.192:8000/api/v2/location/
+  response:
+    body:
+      string: '{"error": "Could not find the provided space object via resource URI
+        ''/api/v2/space/badf00d3-c759-443f-95c9-0fa813034731/''."}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 23 Sep 2019 21:48:50 GMT
+      Server:
+      - nginx/1.16.0
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Language, Cookie
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 400
+      message: BAD REQUEST
+- request:
+    body: '{"description": "AM Client unit test description", "pipeline": ["/api/v2/pipeline/badf00d3-753b-42bd-b312-f39b7db4921d/"],
+      "space": "/api/v2/space/30226523-c759-443f-95c9-0fa813034731/", "default": false,
+      "purpose": "DS", "relative_path": "this/is/a/path"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - ApiKey test:5de62f6f4817f903dcfac47fa5cffd44685a2cf2
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '256'
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: http://192.168.168.192:8000/api/v2/location/
+  response:
+    body:
+      string: '{"error": "Could not find the provided pipeline object via resource
+        URI ''/api/v2/pipeline/badf00d3-753b-42bd-b312-f39b7db4921d/''."}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 23 Sep 2019 21:48:50 GMT
+      Server:
+      - nginx/1.16.0
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Language, Cookie
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 400
+      message: BAD REQUEST
+version: 1

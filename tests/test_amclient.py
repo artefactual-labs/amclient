@@ -993,6 +993,175 @@ class TestAMClient(unittest.TestCase):
             client.get_unit_status(transfer_uuid)
         mock_request.reset_mock()
 
+    @vcr.use_cassette("fixtures/vcr_cassettes/create_location.yaml")
+    def test_create_location(self):
+        """Test the response from the create location function for calls we
+        expect to succeed.
+        """
+
+        pipeline_uri_pattern = "/api/v2/pipeline/"
+        space_uri_pattern = "/api/v2/space/"
+
+        purpose_transfer = "TS"
+        purpose_aip_storage = "AS"
+        purpose_dip_storage = "DS"
+
+        test_desc = "AM Client unit test description"
+        test_path_1 = os.path.join("this", "is", "a", "path")
+        test_path_2 = os.path.join("this", "is", "another", "path")
+        pipeline_uuid_1 = "d6aeb4e0-e836-4768-8225-26e5720950d3"
+        pipeline_uuid_2 = "26bda073-753b-42bd-b312-f39b7db4921d"
+        uri_pipeline_1 = "{}{}/".format(pipeline_uri_pattern, pipeline_uuid_1)
+        uri_pipeline_2 = "{}{}/".format(pipeline_uri_pattern, pipeline_uuid_2)
+        space_uuid = "30226523-c759-443f-95c9-0fa813034731"
+        uri_space = "{}{}/".format(space_uri_pattern, space_uuid)
+
+        # Create a transfer-source and assign it to two pipelines.
+        response = amclient.AMClient(
+            ss_api_key=SS_API_KEY,
+            ss_user_name=SS_USER_NAME,
+            ss_url=SS_URL,
+            location_purpose=purpose_transfer,
+            location_description=test_desc,
+            pipeline_uuids="{},{}".format(pipeline_uuid_1, pipeline_uuid_2),
+            space_uuid=space_uuid,
+            default=False,
+            space_relative_path=test_path_1,
+        ).create_location()
+
+        assert (
+            response.get("description") == test_desc
+        ), "Description returned is incorrect"
+        assert (
+            response.get("relative_path") == test_path_1
+        ), "Path returned is incorrect"
+        assert uri_pipeline_1 and uri_pipeline_2 in response.get(
+            "pipeline"
+        ), "The specified pipelines are not in the API response"
+        assert response.get(
+            "resource_uri"
+        ), "Resource URI is not in response as expected"
+        assert response.get("uuid"), "UUID for the new location not returned"
+        assert (
+            response.get("default") is False
+        ), "Space default has returned incorrectly"
+        assert (
+            response.get("purpose") == purpose_transfer
+        ), "Incorrect purpose assigned to newly created location"
+        assert (
+            response.get("space") == uri_space
+        ), "Incorrect URI for our space returned"
+
+        # Create an archival storage location and assign it to one pipeline.
+        # Make default.
+        response = amclient.AMClient(
+            ss_api_key=SS_API_KEY,
+            ss_user_name=SS_USER_NAME,
+            ss_url=SS_URL,
+            location_purpose=purpose_aip_storage,
+            location_description="AM Client unit test description",
+            pipeline_uuids=pipeline_uuid_1,
+            space_uuid=space_uuid,
+            default=True,
+            space_relative_path=test_path_2,
+        ).create_location()
+
+        assert response.get("relative_path") == test_path_2
+        assert uri_pipeline_1 in response.get("pipeline")
+        assert len(response.get("pipeline")) == 1
+        assert response.get("default") is True
+        assert (
+            response.get("purpose") == purpose_aip_storage
+        ), "Incorrect purpose assigned to newly created location"
+
+        # Create a DIP storage location and provide no description.
+        response = amclient.AMClient(
+            ss_api_key=SS_API_KEY,
+            ss_user_name=SS_USER_NAME,
+            ss_url=SS_URL,
+            location_purpose=purpose_dip_storage,
+            location_description="",
+            pipeline_uuids=pipeline_uuid_1,
+            space_uuid=space_uuid,
+            default=False,
+            space_relative_path=test_path_1,
+        ).create_location()
+
+        assert response.get("description") == ""
+        assert (
+            response.get("purpose") == purpose_dip_storage
+        ), "Incorrect purpose assigned to newly created location"
+
+    @vcr.use_cassette("fixtures/vcr_cassettes/create_location_failures.yaml")
+    def test_create_location_failure_responses(self):
+        """Test various calls that we don't expect to succeed using AMClient.
+        """
+
+        purpose_aip_storage = "AS"
+        purpose_dip_storage = "DS"
+        purpose_non_existent = "ZZ"
+
+        test_desc = "AM Client unit test description"
+        test_path_1 = os.path.join("this", "is", "a", "path")
+        pipeline_uuid_1 = "d6aeb4e0-e836-4768-8225-26e5720950d3"
+        bad_pipeline_uuid = "badf00d3-753b-42bd-b312-f39b7db4921d"
+        space_uuid = "30226523-c759-443f-95c9-0fa813034731"
+        bad_space_uuid = "badf00d3-c759-443f-95c9-0fa813034731"
+
+        # Try to create a transfer source with invalid space.
+        response = amclient.AMClient(
+            ss_api_key=SS_API_KEY,
+            ss_user_name=SS_USER_NAME,
+            ss_url=SS_URL,
+            location_purpose=purpose_aip_storage,
+            location_description=test_desc,
+            pipeline_uuids=pipeline_uuid_1,
+            space_uuid=bad_space_uuid,
+            default=False,
+            space_relative_path=test_path_1,
+        ).create_location()
+
+        assert (
+            errors.error_lookup(response)
+            == errors.error_codes[errors.ERR_INVALID_RESPONSE]
+        ), "Incorrect error code returned from AMClient"
+
+        # Try to create a transfer source with invalid pipeline.
+        response = amclient.AMClient(
+            ss_api_key=SS_API_KEY,
+            ss_user_name=SS_USER_NAME,
+            ss_url=SS_URL,
+            location_purpose=purpose_dip_storage,
+            location_description=test_desc,
+            pipeline_uuids=bad_pipeline_uuid,
+            space_uuid=space_uuid,
+            default=False,
+            space_relative_path=test_path_1,
+        ).create_location()
+
+        assert (
+            errors.error_lookup(response)
+            == errors.error_codes[errors.ERR_INVALID_RESPONSE]
+        ), "Incorrect error code returned from AMClient"
+
+        # Try to create a location with an invalid location type.
+        response = amclient.AMClient(
+            ss_api_key=SS_API_KEY,
+            ss_user_name=SS_USER_NAME,
+            ss_url=SS_URL,
+            location_purpose=purpose_non_existent,
+            location_description=test_desc,
+            pipeline_uuids=pipeline_uuid_1,
+            space_uuid=space_uuid,
+            default=False,
+            space_relative_path=test_path_1,
+        ).create_location()
+
+        assert (
+            response.get("valid_purposes")
+            == amclient.AMClient().list_location_purposes()
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
