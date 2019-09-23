@@ -26,6 +26,11 @@ PACKAGE_UUID = Arg(
     name="package_uuid", help="UUID of the package in the storage service", type=None
 )
 PIPELINE_UUID = Arg(name="pipeline_uuid", help="UUID of the pipeline to use", type=None)
+PIPELINE_UUIDS = Arg(
+    name="pipeline_uuids",
+    help="Single value or comma-separated list of pipelines to associate with a storage location",
+    type=None,
+)
 TRANSFER_DIRECTORY = Arg(
     name="transfer_directory",
     help="Directory of a potential Archivematica transfer",
@@ -342,7 +347,7 @@ SUBCOMMANDS = (
         name="create-location",
         help="Create a new location in the Storage Service for a given space.",
         args=(
-            PIPELINE_UUID,
+            PIPELINE_UUIDS,
             SPACE_UUID,
             LOCATION_PURPOSE,
             SPACE_RELATIVE_PATH,
