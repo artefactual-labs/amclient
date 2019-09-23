@@ -651,10 +651,9 @@ class AMClient(object):
                 "valid_purposes": self.list_location_purposes(),
             }
         url = "{0}/api/v2/location/".format(self.ss_url)
+        desc = self.location_description if self.location_description else ""
         params = {
-            "description": self.location_description
-            if self.location_description
-            else "",
+            "description": desc,
             "pipeline": ["/api/v2/pipeline/{}/".format(self.pipeline_uuid)],
             "space": "/api/v2/space/{}/".format(self.space_uuid),
             "default": self.default if self.default else False,

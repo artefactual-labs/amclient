@@ -43,7 +43,9 @@ SPACE_RELATIVE_PATH = Arg(
     name="space_relative_path", help="Path relative to a storage space", type=None
 )
 LOCATION_PURPOSE = Arg(
-    name="location_purpose", help="Purpose of storage space location", type=None
+    name="location_purpose",
+    help='Purpose of storage space location valid choices: "AR", "AS", "CP", "DS", "SD", "SS", "BL", "TS", "RP"',
+    type=None,
 )
 # Reusable option constants (for CLI), E.g. arguments with reasonable defaults or are not required to complete an API call.
 Opt = namedtuple("Opt", ["name", "metavar", "help", "default", "type"])
