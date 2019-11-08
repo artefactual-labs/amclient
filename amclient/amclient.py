@@ -265,6 +265,13 @@ class AMClient(object):
             "{}/api/transfer/unapproved".format(self.am_url), self._am_auth()
         )
 
+    def get_status(self, uuid):
+        """Get the status of a package."""
+        try:
+            return utils._call_url("/api/ingest/status/{}".format(uuid))
+        except Exception as e:
+            return utils._call_url("/api/transfer/status/{}".format(uuid))
+
     def transferables(self, b64decode=True):
         """Return all transferable entities in the Storage Service.
 

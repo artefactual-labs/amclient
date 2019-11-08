@@ -22,6 +22,37 @@ METHOD_POST = "POST"
 METHOD_DELETE = "DELETE"
 
 
+class AMClientConnectionError(Exception): pass
+class AMClientResponseError(Exception):  pass
+
+
+def _call_url(url, params=None, method=METHOD_GET, headers=None, data=None):
+    """Helper to GET a URL.
+
+    :param str url: URL to call
+    :param dict params: Params to pass as HTTP query string
+    :param str method: HTTP method (e.g., 'GET')
+    :param dict headers: HTTP headers
+    :param dict data: Data to pass to request body
+    :returns: Dict of the returned JSON or raises an exception
+    """
+    method = method.upper()
+    try:
+        response = requests.request(method, url=url, params=params, headers=headers, data=data)
+    except (
+        urllib3.exceptions.NewConnectionError,
+        requests.exceptions.ConnectionError,
+    ) as err:
+        raise AMClientConnectionError("Connection error %s", err)
+    if not response.ok:
+        raise AMClientResponseError(response)
+    try:
+        return response.json()
+    except ValueError:
+        LOGGER.warning("Could not parse JSON from response: %s", response.text)
+        return response.text
+
+
 def _call_url_json(url, params=None, method=METHOD_GET, headers=None, assume_json=True):
     """Helper to GET a URL where the expected response is 200 with JSON.
 
