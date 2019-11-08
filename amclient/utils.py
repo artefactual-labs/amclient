@@ -22,8 +22,12 @@ METHOD_POST = "POST"
 METHOD_DELETE = "DELETE"
 
 
-class AMClientConnectionError(Exception): pass
-class AMClientResponseError(Exception):  pass
+class AMClientConnectionError(Exception):
+    pass
+
+
+class AMClientResponseError(Exception):
+    pass
 
 
 def _call_url(url, params=None, method=METHOD_GET, headers=None, data=None):
@@ -38,7 +42,9 @@ def _call_url(url, params=None, method=METHOD_GET, headers=None, data=None):
     """
     method = method.upper()
     try:
-        response = requests.request(method, url=url, params=params, headers=headers, data=data)
+        response = requests.request(
+            method, url=url, params=params, headers=headers, data=data
+        )
     except (
         urllib3.exceptions.NewConnectionError,
         requests.exceptions.ConnectionError,
