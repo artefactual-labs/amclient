@@ -269,7 +269,7 @@ class AMClient(object):
         """Get the status of a package."""
         try:
             return utils._call_url("/api/ingest/status/{}".format(uuid))
-        except Exception as e:
+        except Exception:
             return utils._call_url("/api/transfer/status/{}".format(uuid))
 
     def transferables(self, b64decode=True):
