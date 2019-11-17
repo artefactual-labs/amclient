@@ -22,15 +22,15 @@ METHOD_POST = "POST"
 METHOD_DELETE = "DELETE"
 
 
-class AMClientConnectionError(Exception):
+class _AMClientConnectionError(Exception):
     pass
 
 
-class AMClientResponseError(Exception):
+class _AMClientResponseError(Exception):
     pass
 
 
-class AMClientJSONError(Exception):
+class _AMClientJSONError(Exception):
     pass
 
 
@@ -59,9 +59,9 @@ def _call_url(
         urllib3.exceptions.NewConnectionError,
         requests.exceptions.ConnectionError,
     ) as err:
-        raise AMClientConnectionError("Connection error %s", err)
+        raise _AMClientConnectionError("Connection error %s", err)
     if not response.ok:
-        raise AMClientResponseError(
+        raise _AMClientResponseError(
             "%s Request to %s returned %s %s",
             method,
             url,
@@ -73,7 +73,7 @@ def _call_url(
         try:
             return response.json()
         except ValueError:  # JSON could not be decoded
-            raise AMClientJSONError(
+            raise _AMClientJSONError(
                 "Could not parse JSON from response: %s", response.text
             )
     return response.text
@@ -110,13 +110,13 @@ def _call_url_json(url, params=None, method=METHOD_GET, headers=None, assume_jso
                 headers=headers,
                 assume_json=assume_json,
             )
-    except AMClientConnectionError as err:
+    except _AMClientConnectionError as err:
         LOGGER.error(err)
         return errors.ERR_SERVER_CONN
-    except AMClientResponseError as err:
+    except _AMClientResponseError as err:
         LOGGER.warning(err)
         return errors.ERR_INVALID_RESPONSE
-    except AMClientJSONError as err:
+    except _AMClientJSONError as err:
         LOGGER.warning(err)
         return errors.ERR_PARSE_JSON
     return data
