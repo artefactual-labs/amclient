@@ -460,7 +460,7 @@ class AMClient(object):
         )
 
     def get_unit_status(self, uuid):
-        """Get the status of a package."""
+        """GET the status of a unit."""
         try:
             return utils._call_url("/api/ingest/status/{}".format(uuid))
         except errors._RequestError:
