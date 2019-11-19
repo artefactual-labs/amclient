@@ -265,13 +265,6 @@ class AMClient(object):
             "{}/api/transfer/unapproved".format(self.am_url), self._am_auth()
         )
 
-    def get_status(self, uuid):
-        """Get the status of a package."""
-        try:
-            return utils._call_url("/api/ingest/status/{}".format(uuid))
-        except Exception:
-            return utils._call_url("/api/transfer/status/{}".format(uuid))
-
     def transferables(self, b64decode=True):
         """Return all transferable entities in the Storage Service.
 
@@ -465,6 +458,15 @@ class AMClient(object):
             "{0}/api/ingest/status/{1}/".format(self.am_url, self.sip_uuid),
             headers=self._am_auth_headers(),
         )
+
+    def get_unit_status(self, uuid):
+        """Get the status of a package."""
+        try:
+            return utils._call_url("/api/ingest/status/{}".format(uuid))
+        except errors._RequestError:
+            return utils._call_url("/api/transfer/status/{}".format(uuid))
+        except errors._AMClientError as err:
+            return str(err)
 
     def get_processing_config(self, assume_json=False):
         """GET a processing configuration file from an Archivematica instance.
