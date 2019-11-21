@@ -24,23 +24,3 @@ def error_lookup(errcode):
         # non-mutating option seems to be to reflect the result back to
         # the calling code to be handled there.
         return errcode
-
-
-class _AMClientError(Exception):
-    pass
-
-
-class _TransportError(_AMClientError):
-    pass
-
-
-class _ConnectionError(_TransportError):
-    pass
-
-
-class _RequestError(_TransportError):
-    pass
-
-
-class _DecodeError(_RequestError):
-    pass

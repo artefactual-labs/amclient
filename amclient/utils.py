@@ -43,27 +43,14 @@ def _call_url(
         LOGGER.debug("Response: %s", response)
         LOGGER.debug("type(response.text): %s ", type(response.text))
         LOGGER.debug("Response content-type: %s", response.headers["content-type"])
-    except (
-        urllib3.exceptions.NewConnectionError,
-        requests.exceptions.ConnectionError,
-    ) as err:
-        raise errors._ConnectionError("Connection error %s", err)
-    if not response.ok:
-        raise errors._RequestError(
-            "%s Request to %s returned %s %s",
-            method,
-            url,
-            response.status_code,
-            response.reason,
-        )
-        LOGGER.debug("Response: %s", response.text)
+        response.raise_for_status()
+    except Exception:
+        raise
     if assume_json:
         try:
             return response.json()
         except ValueError:  # JSON could not be decoded
-            raise errors._DecodeError(
-                "Could not parse JSON from response: %s", response.text
-            )
+            raise
     return response.text
 
 
@@ -98,14 +85,24 @@ def _call_url_json(url, params=None, method=METHOD_GET, headers=None, assume_jso
                 headers=headers,
                 assume_json=assume_json,
             )
-    except errors._ConnectionError as err:
-        LOGGER.error(err)
+    except (
+        urllib3.exceptions.NewConnectionError,
+        requests.exceptions.ConnectionError,
+    ) as err:
+        LOGGER.error("Connection error %s", err)
         return errors.ERR_SERVER_CONN
-    except errors._RequestError as err:
-        LOGGER.warning(err)
+    except requests.exceptions.RequestException as err:
+        LOGGER.debug("Response: %s", err.response.text)
+        LOGGER.warning(
+            "%s Request to %s returned %s %s",
+            method,
+            url,
+            err.response.status_code,
+            err.response.reason,
+        )
         return errors.ERR_INVALID_RESPONSE
-    except errors._DecodeError as err:
-        LOGGER.warning(err)
+    except ValueError as err:
+        LOGGER.warning("Could not parse JSON from response: %s", str(err))
         return errors.ERR_PARSE_JSON
     return data
 
