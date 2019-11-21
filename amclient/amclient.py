@@ -461,12 +461,14 @@ class AMClient(object):
 
     def get_unit_status(self, uuid):
         """GET the status of a unit."""
-        try:
-            return utils._call_url("/api/ingest/status/{}".format(uuid))
-        except errors._RequestError:
+        transfer = utils._call_url("/api/ingest/status/{}".format(uuid))
+        if (
+            transfer.get("status") == "COMPLETE"
+            and transfer.get("sip_uuid")
+            and transfer.get("sip_uuid") != "BACKLOG"
+        ):
             return utils._call_url("/api/transfer/status/{}".format(uuid))
-        except errors._AMClientError as err:
-            return str(err)
+        return transfer
 
     def get_processing_config(self, assume_json=False):
         """GET a processing configuration file from an Archivematica instance.
