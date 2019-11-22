@@ -4,16 +4,12 @@
 
 """
 import collections
+import mock
 import os
 import shutil
 import sys
 import unittest
 import uuid
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 import vcr
 
@@ -929,27 +925,51 @@ class TestAMClient(unittest.TestCase):
 
     @mock.patch("utils.requests.request")
     def test_get_status(self, mock_request):
+        unit_uuid = "ca480d94-892c-4d99-bbb1-290698406571"
+        # Test status for incomplete ingest
         mock_request.return_value.json.return_value = {"status": "PROCESSING"}
-        response = amclient.AMClient(
+        amclient.AMClient(
             am_api_key=AM_API_KEY, am_user_name=AM_USER_NAME, am_url=AM_URL
-        ).get_unit_status("ca480d94-892c-4d99-bbb1-290698406571")
-        assert response.get("status") == "PROCESSING"
+        ).get_unit_status(unit_uuid)
+        mock_request.assert_called_once_with(
+            "GET",
+            data=None,
+            headers=None,
+            params=None,
+            url="/api/transfer/status/{}".format(unit_uuid),
+        )
+        mock_request.reset_mock()
 
+        # Test status for completed transfer
         mock_request.return_value.json.return_value = {
             "status": "COMPLETE",
             "sip_uuid": "1234",
         }
-        response = amclient.AMClient(
+        amclient.AMClient(
             am_api_key=AM_API_KEY, am_user_name=AM_USER_NAME, am_url=AM_URL
-        ).get_unit_status("ca480d94-892c-4d99-bbb1-290698406571")
-        assert response.get("status") == "COMPLETE"
+        ).get_unit_status(unit_uuid)
+        assert mock_request.call_count == 2
+        mock_request.assert_called_with(
+            "GET",
+            data=None,
+            headers=None,
+            params=None,
+            url="/api/ingest/status/{}".format(unit_uuid),
+        )
+        mock_request.reset_mock(return_value=True)
 
+        # Test request exceptions
         mock_request.return_value.ok = False
-        mock_request.return_value.json.return_value = {}
-        response = amclient.AMClient(
+        amclient.AMClient(
             am_api_key=AM_API_KEY, am_user_name=AM_USER_NAME, am_url=AM_URL
-        ).get_unit_status("ca480d94-892c-4d99-bbb1-290698406571")
-        assert len(response) == 0
+        ).get_unit_status(unit_uuid)
+        mock_request.assert_called_once_with(
+            "GET",
+            data=None,
+            headers=None,
+            params=None,
+            url="/api/transfer/status/{}".format(unit_uuid),
+        )
 
 
 if __name__ == "__main__":
