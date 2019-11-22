@@ -10,6 +10,11 @@ import sys
 import unittest
 import uuid
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 import vcr
 
 amclient = os.path.join(
@@ -921,6 +926,30 @@ class TestAMClient(unittest.TestCase):
         ).get_jobs()
         assert len(response) == 1
         assert response[0]["name"] == "Verify metadata directory checksums"
+
+    @mock.patch("utils.requests.request")
+    def test_get_status(self, mock_request):
+        mock_request.return_value.json.return_value = {"status": "PROCESSING"}
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY, am_user_name=AM_USER_NAME, am_url=AM_URL
+        ).get_unit_status("ca480d94-892c-4d99-bbb1-290698406571")
+        assert response.get("status") == "PROCESSING"
+
+        mock_request.return_value.json.return_value = {
+            "status": "COMPLETE",
+            "sip_uuid": "1234",
+        }
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY, am_user_name=AM_USER_NAME, am_url=AM_URL
+        ).get_unit_status("ca480d94-892c-4d99-bbb1-290698406571")
+        assert response.get("status") == "COMPLETE"
+
+        mock_request.return_value.ok = False
+        mock_request.return_value.json.return_value = {}
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY, am_user_name=AM_USER_NAME, am_url=AM_URL
+        ).get_unit_status("ca480d94-892c-4d99-bbb1-290698406571")
+        assert len(response) == 0
 
 
 if __name__ == "__main__":
