@@ -960,10 +960,11 @@ class TestAMClient(unittest.TestCase):
             params=None,
             url="/api/ingest/status/{}".format(unit_uuid),
         )
-        mock_request.reset_mock(return_value=True)
+        mock_request.reset_mock()
 
         # Test request exceptions
         mock_request.return_value.ok = False
+        mock_request.return_value.json.return_value = {}
         amclient.AMClient(
             am_api_key=AM_API_KEY, am_user_name=AM_USER_NAME, am_url=AM_URL
         ).get_unit_status(unit_uuid)
