@@ -460,7 +460,7 @@ class AMClient(object):
         )
 
     def get_unit_status(self, uuid):
-        """GET the status of a unit."""
+        """Look up the status of an ingest or transfer unit."""
         transfer = utils._call_url("/api/transfer/status/{}".format(uuid))
         if (
             transfer.get("status") == "COMPLETE"
