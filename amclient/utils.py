@@ -36,21 +36,15 @@ def _call_url(
                              decoded as JSON
     :returns: Dict of the returned JSON or raises an exception
     """
-    try:
-        response = requests.request(
-            method, url=url, params=params, headers=headers, data=data
-        )
-        LOGGER.debug("Response: %s", response)
-        LOGGER.debug("type(response.text): %s ", type(response.text))
-        LOGGER.debug("Response content-type: %s", response.headers["content-type"])
-        response.raise_for_status()
-    except Exception:
-        raise
+    response = requests.request(
+        method, url=url, params=params, headers=headers, data=data
+    )
+    LOGGER.debug("Response: %s", response)
+    LOGGER.debug("type(response.text): %s ", type(response.text))
+    LOGGER.debug("Response content-type: %s", response.headers["content-type"])
+    response.raise_for_status()
     if assume_json:
-        try:
-            return response.json()
-        except ValueError:  # JSON could not be decoded
-            raise
+        return response.json()
     return response.text
 
 
