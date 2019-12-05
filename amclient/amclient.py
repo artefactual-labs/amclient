@@ -460,14 +460,25 @@ class AMClient(object):
         )
 
     def get_unit_status(self, uuid):
-        """Look up the status of an ingest or transfer unit using the transfer UUID."""
-        transfer = utils._call_url("/api/transfer/status/{}".format(uuid))
+        """Look up the status of an ingest or transfer unit using the transfer
+        UUID."""
+        transfer = utils._call_url(
+            "{0}/api/transfer/status/{1}".format(self.am_url, uuid),
+            headers=self._am_auth_headers(),
+        )
         if (
             transfer.get("status") == "COMPLETE"
             and transfer.get("sip_uuid")
             and transfer.get("sip_uuid") != "BACKLOG"
         ):
-            return utils._call_url("/api/ingest/status/{}".format(uuid))
+            sip_uuid = transfer.get("sip_uuid")
+            if not sip_uuid:
+                return transfer
+
+            return utils._call_url(
+                "{0}/api/ingest/status/{1}".format(self.am_url, sip_uuid),
+                headers=self._am_auth_headers(),
+            )
         return transfer
 
     def get_processing_config(self, assume_json=False):
