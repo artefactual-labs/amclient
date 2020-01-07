@@ -22,6 +22,32 @@ METHOD_POST = "POST"
 METHOD_DELETE = "DELETE"
 
 
+def _call_url(
+    url, params=None, method=METHOD_GET, headers=None, data=None, assume_json=True
+):
+    """Helper to GET a URL.
+
+    :param str url: URL to call
+    :param dict params: Params to pass as HTTP query string
+    :param str method: HTTP method (e.g., 'GET')
+    :param dict headers: HTTP headers
+    :param dict data: Data to pass to request body
+    :param bool assume_json: set to False if the response body should not be
+                             decoded as JSON
+    :returns: Dict of the returned JSON or raises an exception
+    """
+    response = requests.request(
+        method, url=url, params=params, headers=headers, data=data
+    )
+    LOGGER.debug("Response: %s", response)
+    LOGGER.debug("type(response.text): %s ", type(response.text))
+    LOGGER.debug("Response content-type: %s", response.headers["content-type"])
+    response.raise_for_status()
+    if assume_json:
+        return response.json()
+    return response.text
+
+
 def _call_url_json(url, params=None, method=METHOD_GET, headers=None, assume_json=True):
     """Helper to GET a URL where the expected response is 200 with JSON.
 
@@ -38,35 +64,41 @@ def _call_url_json(url, params=None, method=METHOD_GET, headers=None, assume_jso
     LOGGER.debug("URL: %s; params: %s; method: %s", url, params, method)
     try:
         if method == METHOD_GET or method == METHOD_DELETE:
-            response = requests.request(method, url=url, params=params, headers=headers)
+            data = _call_url(
+                url,
+                method=method,
+                params=params,
+                headers=headers,
+                assume_json=assume_json,
+            )
         else:
-            response = requests.request(method, url=url, data=params, headers=headers)
-        LOGGER.debug("Response: %s", response)
-        LOGGER.debug("type(response.text): %s ", type(response.text))
-        LOGGER.debug("Response content-type: %s", response.headers["content-type"])
+            data = _call_url(
+                url,
+                method=method,
+                data=params,
+                headers=headers,
+                assume_json=assume_json,
+            )
     except (
         urllib3.exceptions.NewConnectionError,
         requests.exceptions.ConnectionError,
     ) as err:
         LOGGER.error("Connection error %s", err)
         return errors.ERR_SERVER_CONN
-    if not response.ok:
+    except requests.exceptions.RequestException as err:
+        LOGGER.debug("Response: %s", err.response.text)
         LOGGER.warning(
             "%s Request to %s returned %s %s",
             method,
             url,
-            response.status_code,
-            response.reason,
+            err.response.status_code,
+            err.response.reason,
         )
-        LOGGER.debug("Response: %s", response.text)
         return errors.ERR_INVALID_RESPONSE
-    if assume_json:
-        try:
-            return response.json()
-        except ValueError:  # JSON could not be decoded
-            LOGGER.warning("Could not parse JSON from response: %s", response.text)
-            return errors.ERR_PARSE_JSON
-    return response.text
+    except ValueError as err:
+        LOGGER.warning("Could not parse JSON from response: %s", str(err))
+        return errors.ERR_PARSE_JSON
+    return data
 
 
 try:
