@@ -2,8 +2,16 @@
 
 # amclient
 
-The transfers/amclient.py script is a module and CLI that provides
-functionality for interacting with the various Archivematica APIs.
+AMClient is an Archivematica API client library and Python package for making
+it easier to talk to Archivematica from your Python scripts. AMClient also acts
+as a command line application which can easily be combined with shell-scripts
+to perform the same functions as a Python script might.
+
+AMClient brings together the majority of the functionality of the two primary
+Archivematica components:
+
+* [Archivematica API][archivematica-api]
+* [Storage Service API][storage-service-api]
 
 Basic usage:
     `amclient.py <subcommand> [optional arguments] <positional argument(s)>`
@@ -44,3 +52,12 @@ Calling the module from Python:
     >>> am.list_storage_locations()
     ...json is output here...
 ```
+
+## CONTRIBUTING
+
+For information about contributing to this project please see the AMClient
+[CONTRIBUTING.md][contributing]
+
+[archivematica-api]: https://wiki.archivematica.org/Archivematica_API
+[storage-service-api]: https://wiki.archivematica.org/Storage_Service_API
+[contributing]: CONTRIBUTING.md
