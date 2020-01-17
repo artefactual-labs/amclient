@@ -1,5 +1,6 @@
 -r base.txt
 pytest
-vcrpy>=1.0.0
-flake8==3.4.1
-flake8-import-order==0.13
+vcrpy<2; python_version <= '2.7'
+vcrpy>4; python_version >= '3.5'
+flake8>3
+flake8-import-order<1
