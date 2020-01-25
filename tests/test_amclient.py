@@ -3,7 +3,12 @@
     $ python -m unittest tests.test_amclient
 
 """
+from __future__ import unicode_literals
+
+from binascii import hexlify
 import collections
+from contextlib import contextmanager
+import hashlib
 import os
 import shutil
 import sys
@@ -16,7 +21,14 @@ except ImportError:
     import mock
 
 import requests
+import six
 import vcr
+
+try:
+    from StringIO import BytesIO  # for Python 2
+except ImportError:
+    from io import BytesIO  # for Python 3
+
 
 amclient = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "amclient"
@@ -56,6 +68,17 @@ class TmpDir:
             shutil.rmtree(self.tmp_dir_path)
         if exc_type:
             return None
+
+
+@contextmanager
+def captured_output():
+    new_out, new_err = BytesIO(), BytesIO()
+    old_out, old_err = sys.stdout, sys.stderr
+    try:
+        sys.stdout, sys.stderr = new_out, new_err
+        yield sys.stdout, sys.stderr
+    finally:
+        sys.stdout, sys.stderr = old_out, old_err
 
 
 class TestAMClient(unittest.TestCase):
@@ -868,6 +891,60 @@ class TestAMClient(unittest.TestCase):
             assert os.path.isfile(file_)
             assert os.path.getsize(file_) == int(response.get("Content-Length", 0))
             assert filename_to_test in response.get("Content-Disposition", "")
+
+    @vcr.use_cassette("fixtures/vcr_cassettes/test_extract_individual_file.yaml")
+    def test_extract_and_stream_individual_file(self):
+        """Test the result of downloading an individual file from a package in
+        the storage service.
+        """
+        with TmpDir(TMP_DIR):
+            filename_to_test = "bird.mp3"
+            package_uuid = "2ad1bf0d-23fa-44e0-a128-9feadfe22c42"
+            path = "amclient-transfer_1-{}/data/objects/{}".format(
+                package_uuid, filename_to_test
+            )
+            response = amclient.AMClient(
+                ss_api_key=SS_API_KEY,
+                ss_user_name=SS_USER_NAME,
+                ss_url=SS_URL,
+                package_uuid=package_uuid,
+                relative_path=path,
+                stream=True,
+            ).extract_file()
+            # We have a stream, check we have an iterator and some content.
+            assert (
+                hexlify(six.next(response.iter_content(chunk_size=14)))
+                == b"49443303000000001f7654495432"
+            )
+            assert response.headers.get("Content-Length") == "5992608"
+            assert filename_to_test in response.headers.get("Content-Disposition", "")
+
+    @vcr.use_cassette("fixtures/vcr_cassettes/test_extract_individual_file.yaml")
+    def test_extract_and_stream_individual_file_cli(self):
+        """Test the result of downloading an individual file from a package in
+        the storage service. Specifically if via the CLI.
+        """
+        with TmpDir(TMP_DIR):
+            filename_to_test = "bird.mp3"
+            package_uuid = "2ad1bf0d-23fa-44e0-a128-9feadfe22c42"
+            path = "amclient-transfer_1-{}/data/objects/{}".format(
+                package_uuid, filename_to_test
+            )
+            with captured_output() as (out, err):
+                amclient.AMClient(
+                    ss_api_key=SS_API_KEY,
+                    ss_user_name=SS_USER_NAME,
+                    ss_url=SS_URL,
+                    package_uuid=package_uuid,
+                    relative_path=path,
+                    stream=True,
+                ).extract_file_stream()
+            stdout = out.getvalue()
+            assert b"ID3\x03\x00\x00\x00\x00\x1fvTIT2" in stdout
+            assert len(stdout) == 5992608
+            # We are working with archival objects, lets make sure the return
+            # is as robust as possible, i.e. no stray bytes.
+            assert hashlib.md5(stdout).hexdigest() == "7f42199657dea535b6ad1963a6c7a2ac"
 
     @vcr.use_cassette("fixtures/vcr_cassettes/jobs.yaml")
     def test_get_jobs(self):

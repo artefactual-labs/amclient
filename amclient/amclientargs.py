@@ -331,6 +331,12 @@ SUBCOMMANDS = (
         opts=(SS_USER_NAME, SS_URL, DIRECTORY, SAVEAS_FILENAME),
     ),
     SubCommand(
+        name="extract-file-stream",
+        help="Extract a file from a package in the storage service as a stream.",
+        args=(SS_API_KEY, PACKAGE_UUID, RELATIVE_PATH),
+        opts=(SS_USER_NAME, SS_URL),
+    ),
+    SubCommand(
         name="get-jobs",
         help="Retrieve a list of jobs ran for a unit (transfer or ingest).",
         args=(AM_API_KEY, UNIT_UUID),

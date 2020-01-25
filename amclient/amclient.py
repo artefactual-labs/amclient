@@ -116,6 +116,8 @@ class AMClient(object):
         param: aip_uuid
         param: dip_uuid
         param: directory
+        param: stream
+        param: cli_call
         """
         for key, val in kwargs.items():
             setattr(self, key, val)
@@ -142,7 +144,11 @@ class AMClient(object):
                         err_lookup.get(res, err_lookup(errors.ERR_CLIENT_UNKNOWN))
                     )
                 else:
-                    self.stdout(res)
+                    # Output to stdout if the returning function hasn't
+                    # returned None (or an error). To enable functions
+                    # returning None to manage their own output streams.
+                    if res:
+                        self.stdout(res)
             except requests.exceptions.InvalidURL:
                 self.stdout(errors.error_lookup(errors.ERR_INVALID_URL))
             except BaseException:
@@ -596,16 +602,38 @@ class AMClient(object):
             method=utils.METHOD_POST,
         )
 
+    def extract_file_stream(self):
+        """Extract a file, relative to an AIP's path. The primary functionality
+        is provided by extract_file below. This helper command exists to change
+        the response behavior specifically for the command-line i.e. to enable
+        the output of a stream's content directly to stdout.
+        """
+        self.stream = True
+        self.cli_call = True
+        return self.extract_file()
+
     def extract_file(self):
-        """Extract a file, relative to an AIP's path. If a filename and
-        directory are provided use that information, otherwise download the
-        file relative to the directory the script is invoked from.
+        """Extract a file, relative to an AIP's path.
+
+        If a filename and directory are provided use that information,
+        otherwise download the file relative to the directory the script is
+        invoked from.
+
+        If stream is True then the raw response is provided to the caller, if
+        the caller is an API user. If the caller is the AMClient command-line
+        then the stream contents are output to the console.
         """
         self.output_mode = "".format(None)
         url = "{0}/api/v2/file/{1}/extract_file/?relative_path_to_file={2}".format(
             self.ss_url, self.package_uuid, self.relative_path
         )
         response = requests.get(url, params=self._ss_auth(), stream=True)
+        if getattr(self, "stream", None):
+            if getattr(self, "cli_call", None):
+                for line in response.iter_content(chunk_size=1024):
+                    sys.stdout.write(line)
+                return
+            return response
         if response.status_code == 200:
             local_filename = getattr(self, "saveas_filename", None)
             if not local_filename:
