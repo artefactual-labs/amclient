@@ -50,13 +50,16 @@ setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     keywords="Archivematica API Archivematica-Storage-Service SDK",
     packages=find_packages(exclude=["fixtures", "requirements", "tests*"]),
     install_requires=["requests<3", "six<2", "urllib3<2"],
     include_package_data=True,
-    python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*",
+    python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*",
     # Entry point for the amclient binary
     entry_points={"console_scripts": ["amclient=amclient.amclient:main"]},
 )
