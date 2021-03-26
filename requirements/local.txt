@@ -1,5 +1,6 @@
 -r base.txt
 pytest
+pytest-cov
 vcrpy<2; python_version <= '2.7'
 vcrpy>4; python_version >= '3.5'
 flake8>3
