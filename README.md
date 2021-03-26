@@ -1,4 +1,5 @@
-[![Travis CI](https://travis-ci.org/artefactual-labs/amclient.svg?branch=master)](https://travis-ci.org/artefactual-labs/amclient)
+[![GitHub CI](https://github.com/artefactual-labs/amclient/actions/workflows/test.yml/badge.svg)](https://github.com/artefactual-labs/amclient/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/artefactual-labs/amclient/branch/master/graph/badge.svg?token=hJLGYzoJUo)](https://codecov.io/gh/artefactual-labs/amclient)
 
 # amclient
 
