@@ -22,6 +22,16 @@ METHOD_POST = "POST"
 METHOD_DELETE = "DELETE"
 
 
+class Error(int):
+    """Subclass of int which accepts additional attributes. This allows specific
+    error messages to be passed through requests"""
+
+    def __new__(cls, *args, **kwargs):
+        i = int.__new__(cls, *args)
+        i.message = kwargs.get("message")
+        return i
+
+
 def _call_url(
     url, params=None, method=METHOD_GET, headers=None, data=None, assume_json=True
 ):
@@ -48,7 +58,14 @@ def _call_url(
     return response.text
 
 
-def _call_url_json(url, params=None, method=METHOD_GET, headers=None, assume_json=True):
+def _call_url_json(
+    url,
+    params=None,
+    method=METHOD_GET,
+    headers=None,
+    assume_json=True,
+    enhanced_errors=False,
+):
     """Helper to GET a URL where the expected response is 200 with JSON.
 
     :param str url: URL to call
@@ -94,7 +111,12 @@ def _call_url_json(url, params=None, method=METHOD_GET, headers=None, assume_jso
             err.response.status_code,
             err.response.reason,
         )
-        return errors.ERR_INVALID_RESPONSE
+        message = err.response.json if assume_json else err.response.text
+        return (
+            Error(errors.ERR_INVALID_RESPONSE, message=message)
+            if enhanced_errors
+            else errors.ERR_INVALID_RESPONSE
+        )
     except ValueError as err:
         LOGGER.warning("Could not parse JSON from response: %s", str(err))
         return errors.ERR_PARSE_JSON

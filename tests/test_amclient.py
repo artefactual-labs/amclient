@@ -10,6 +10,7 @@ import collections
 from contextlib import contextmanager
 import hashlib
 import os
+import pytest
 import shutil
 import sys
 import unittest
@@ -1238,6 +1239,63 @@ class TestAMClient(unittest.TestCase):
             response.get("valid_purposes")
             == amclient.AMClient().list_location_purposes()
         )
+
+    @mock.patch("utils.requests.request")
+    def test_validate_csv(self, mock_request):
+        client = amclient.AMClient(
+            am_api_key=AM_API_KEY, am_user_name=AM_USER_NAME, am_url=AM_URL
+        )
+        filepath = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "fixtures",
+            "validate_me.csv",
+        )
+        expected_headers = client._am_auth_headers()
+        expected_headers.update({"Content-Type": "text/csv; charset=utf-8"})
+
+        file_obj = open(filepath, "r")
+        file_contents = file_obj.read()
+
+        # file is valid
+        mock_request.return_value.json.return_value = {"valid": "true"}
+        for validator in ["avalon", "rights"]:
+            file_obj.seek(0)  # reset cursor so read() produces desired data
+            assert client.validate_csv(validator, file_obj) == {"valid": "true"}
+            mock_request.assert_called_once_with(
+                "POST",
+                data=file_contents,
+                params=None,
+                headers=expected_headers,
+                url="{}/api/v2beta/validate/{}/".format(client.am_url, validator),
+            )
+            mock_request.reset_mock()
+
+        # file is invalid
+        http_error = requests.exceptions.HTTPError()
+        error_message = {"valid": False, "reason": "A required field is missing."}
+        http_error.response = mock.Mock()
+        http_error.response.json = error_message
+        mock_request.side_effect = http_error
+        client.enhanced_errors = True
+        for validator in ["avalon", "rights"]:
+            file_obj.seek(0)  # reset cursor so read() produces desired data
+            result = client.validate_csv(validator, file_obj)
+            assert result == errors.ERR_INVALID_RESPONSE
+            assert result.message == error_message
+            mock_request.assert_called_once_with(
+                "POST",
+                data=file_contents,
+                params=None,
+                headers=expected_headers,
+                url="{}/api/v2beta/validate/{}/".format(client.am_url, validator),
+            )
+            mock_request.reset_mock()
+
+        file_obj.close()
+
+        # file is wrong type
+        with pytest.raises(TypeError):
+            client.validate_csv("avalon", filepath)
 
 
 if __name__ == "__main__":
