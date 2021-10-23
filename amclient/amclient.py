@@ -11,6 +11,7 @@ from __future__ import print_function, unicode_literals
 import binascii
 import base64
 from collections import defaultdict
+import io
 import json
 import logging
 import os
@@ -118,6 +119,7 @@ class AMClient(object):
         param: directory
         param: stream
         param: cli_call
+        param: enhanced_errors
         """
         for key, val in kwargs.items():
             setattr(self, key, val)
@@ -600,6 +602,28 @@ class AMClient(object):
             headers=self._am_auth_headers(),
             params=json.dumps(params),
             method=utils.METHOD_POST,
+        )
+
+    def validate_csv(self, validator, file_obj):
+        """Validates a CSV file against a set of embedded rules. The file to be
+        validated is expected to be passed as an open file object (in Python 3+
+        a io.TextIOBase instance)."""
+        url = "{}/api/v2beta/validate/{}/".format(self.am_url, validator)
+        if not (isinstance(file_obj, io.TextIOBase) or hasattr(file_obj, "read")):
+            raise TypeError(
+                "Expected an io.TextIOWrapper file object but got {} instead".format(
+                    type(file_obj)
+                )
+            )
+        data = file_obj.read()
+        headers = self._am_auth_headers()
+        headers.update({"Content-Type": "text/csv; charset=utf-8"})
+        return utils._call_url_json(
+            url,
+            params=data,
+            method=utils.METHOD_POST,
+            headers=headers,
+            enhanced_errors=getattr(self, "enhanced_errors", False),
         )
 
     def extract_file_stream(self):
