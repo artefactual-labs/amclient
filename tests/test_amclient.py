@@ -295,8 +295,7 @@ class TestAMClient(unittest.TestCase):
 
     @vcr.use_cassette("fixtures/vcr_cassettes/dips_no_dips.yaml")
     def test_dips_no_dips(self):
-        """Test that we get no DIPs from the Storage Service if there are none.
-        """
+        """Test that we get no DIPs from the Storage Service if there are none."""
         dips = amclient.AMClient(
             ss_url=SS_URL, ss_user_name=SS_USER_NAME, ss_api_key=SS_API_KEY
         ).dips()
@@ -1172,8 +1171,7 @@ class TestAMClient(unittest.TestCase):
 
     @vcr.use_cassette("fixtures/vcr_cassettes/create_location_failures.yaml")
     def test_create_location_failure_responses(self):
-        """Test various calls that we don't expect to succeed using AMClient.
-        """
+        """Test various calls that we don't expect to succeed using AMClient."""
 
         purpose_aip_storage = "AS"
         purpose_dip_storage = "DS"
@@ -1274,7 +1272,7 @@ class TestAMClient(unittest.TestCase):
         http_error = requests.exceptions.HTTPError()
         error_message = {"valid": False, "reason": "A required field is missing."}
         http_error.response = mock.Mock()
-        http_error.response.json = error_message
+        http_error.response.json.return_value = error_message
         mock_request.side_effect = http_error
         client.enhanced_errors = True
         for validator in ["avalon", "rights"]:

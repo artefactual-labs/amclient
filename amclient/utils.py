@@ -31,6 +31,17 @@ class Error(int):
         i.message = kwargs.get("message")
         return i
 
+    @classmethod
+    def from_request_exception(cls, error_code, request_exception):
+        response = request_exception.response
+        if response is None:
+            return Error(error_code)
+        try:
+            message = response.json()
+        except requests.exceptions.JSONDecodeError:
+            message = response.text
+        return Error(error_code, message=message)
+
 
 def _call_url(
     url, params=None, method=METHOD_GET, headers=None, data=None, assume_json=True
@@ -111,9 +122,8 @@ def _call_url_json(
             err.response.status_code,
             err.response.reason,
         )
-        message = err.response.json if assume_json else err.response.text
         return (
-            Error(errors.ERR_INVALID_RESPONSE, message=message)
+            Error.from_request_exception(errors.ERR_INVALID_RESPONSE, err)
             if enhanced_errors
             else errors.ERR_INVALID_RESPONSE
         )
