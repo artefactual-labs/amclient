@@ -214,7 +214,7 @@ class AMClient(object):
         return self._close_completed_units("ingest")
 
     def _close_completed_units(self, unit_type):
-        """Close all completed transfers/ingests.  """
+        """Close all completed transfers/ingests."""
         try:
             _completed_units = getattr(self, "completed_{0}s".format(unit_type))().get(
                 "results"
@@ -647,7 +647,7 @@ class AMClient(object):
         the caller is an API user. If the caller is the AMClient command-line
         then the stream contents are output to the console.
         """
-        self.output_mode = "".format(None)
+        self.output_mode = ""  # TODO: don't overwrite mode
         url = "{0}/api/v2/file/{1}/extract_file/?relative_path_to_file={2}".format(
             self.ss_url, self.package_uuid, self.relative_path
         )
