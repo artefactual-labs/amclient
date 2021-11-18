@@ -114,6 +114,7 @@ class AMClient(object):
         param: output_mode
         param: transfer_source
         param: transfer_path
+        param: sip_uuid
         param: aip_uuid
         param: dip_uuid
         param: directory
@@ -523,6 +524,17 @@ class AMClient(object):
             "type": self.transfer_type,
             "directory": utils.fsencode(self.transfer_directory),
         }
+        return utils._call_url_json(
+            url,
+            headers=self._am_auth_headers(),
+            params=params,
+            method=utils.METHOD_POST,
+        )
+
+    def approve_partial_reingest(self):
+        """Approve a partial reingest using the SIP UUID."""
+        url = "{0}/api/ingest/reingest/approve/".format(self.am_url)
+        params = {"uuid": self.sip_uuid}
         return utils._call_url_json(
             url,
             headers=self._am_auth_headers(),
