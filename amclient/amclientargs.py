@@ -293,6 +293,12 @@ SUBCOMMANDS = (
         opts=(TRANSFER_TYPE, AM_USER_NAME, AM_URL, OUTPUT_MODE),
     ),
     SubCommand(
+        name="approve-partial-reingest",
+        help="Approve a partial reingest using the SIP UUID.",
+        args=(SIP_UUID, AM_API_KEY),
+        opts=(AM_USER_NAME, AM_URL, OUTPUT_MODE),
+    ),
+    SubCommand(
         name="reingest-aip",
         help="Initiate the reingest of an AIP from the storage service with a given UUID.",
         args=(PIPELINE_UUID, AIP_UUID, SS_API_KEY),

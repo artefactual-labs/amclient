@@ -676,7 +676,7 @@ class TestAMClient(unittest.TestCase):
     @vcr.use_cassette("fixtures/vcr_cassettes/approve_non_existing_transfer.yaml")
     def test_approve_non_existing_transfer(self):
         """If a transfer isn't available for us to approve, test the response
-        from AMClient.py. The respons is a 404 and this is handled
+        from AMClient.py. The response is a 404 and this is handled
         specifically by utils.py and the return is an error code.
         """
         response = amclient.AMClient(
@@ -691,7 +691,7 @@ class TestAMClient(unittest.TestCase):
             == errors.error_codes[errors.ERR_INVALID_RESPONSE]
         )
 
-    @vcr.use_cassette("fixtures/vcr_cassettes/reingest_exsting_aip.yaml")
+    @vcr.use_cassette("fixtures/vcr_cassettes/reingest_existing_aip.yaml")
     def test_reingest_aip(self):
         """Test amclient's ability to initiate the reingest of an AIP."""
         pipeline_uuid = "65aaac5d-b4fd-478e-967b-6cdfee02f2c5"
@@ -1294,6 +1294,31 @@ class TestAMClient(unittest.TestCase):
         # file is wrong type
         with pytest.raises(TypeError):
             client.validate_csv("avalon", filepath)
+
+    @vcr.use_cassette("fixtures/vcr_cassettes/approve_existing_partial_reingest.yaml")
+    def test_approve_partial_reingest(self):
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY,
+            am_user_name=AM_USER_NAME,
+            am_url=AM_URL,
+            sip_uuid="7d41223f-76af-4732-96a9-fb06aa5feaed",
+        ).approve_partial_reingest()
+        assert response["message"] == "Approval successful."
+
+    @vcr.use_cassette(
+        "fixtures/vcr_cassettes/approve_non_existing_partial_reingest.yaml"
+    )
+    def test_approve_non_existing_partial_reingest(self):
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY,
+            am_user_name=AM_USER_NAME,
+            am_url=AM_URL,
+            sip_uuid="4ceaf490-cf9b-425a-adb7-8358a7a68fa9",
+        ).approve_partial_reingest()
+        assert (
+            errors.error_lookup(response)
+            == errors.error_codes[errors.ERR_INVALID_RESPONSE]
+        )
 
 
 if __name__ == "__main__":
