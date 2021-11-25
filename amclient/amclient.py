@@ -594,6 +594,28 @@ class AMClient(object):
             url, headers=self._am_auth_headers(), params=params, method=utils.METHOD_GET
         )
 
+    def copy_metadata_files(self, sip_uuid, source_paths):
+        """Add metadata files to a SIP using its UUID.
+
+        The `source_paths` parameter must be a list of tuples with
+        (location UUID, absolute path).
+        """
+        url = "{}/api/ingest/copy_metadata_files/".format(self.am_url)
+        params = {
+            "sip_uuid": sip_uuid,
+            "source_paths[]": [
+                base64.b64encode("{}:{}".format(location_uuid, path).encode())
+                for (location_uuid, path) in source_paths
+            ],
+        }
+        return utils._call_url_json(
+            url,
+            params=params,
+            method=utils.METHOD_POST,
+            headers=self._am_auth_headers(),
+            enhanced_errors=getattr(self, "enhanced_errors", False),
+        )
+
     def create_package(self):
         """Create a transfer using the new API v2 package endpoint."""
         url = "{}/api/v2beta/package/".format(self.am_url)

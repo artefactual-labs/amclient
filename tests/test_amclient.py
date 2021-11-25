@@ -1320,6 +1320,65 @@ class TestAMClient(unittest.TestCase):
             == errors.error_codes[errors.ERR_INVALID_RESPONSE]
         )
 
+    @vcr.use_cassette("fixtures/vcr_cassettes/copy_metadata_files.yaml")
+    def test_copy_metadata_files(self):
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY,
+            am_user_name=AM_USER_NAME,
+            am_url=AM_URL,
+        ).copy_metadata_files(
+            "f8beb140-3149-471c-861a-249e1d851c92",
+            [
+                (
+                    "4d0de0aa-2658-4f21-bb09-d730b84b2b01",
+                    "/home/archivematica/archivematica-sampledata/metadata.csv",
+                ),
+                (
+                    "4d0de0aa-2658-4f21-bb09-d730b84b2b01",
+                    "/home/archivematica/archivematica-sampledata/mdupdate.zip",
+                ),
+            ],
+        )
+        assert response["message"] == "Metadata files added successfully."
+
+    def _test_copy_metadata_files_with_empty_parameter(self, *params):
+        response = amclient.AMClient(
+            am_api_key=AM_API_KEY,
+            am_user_name=AM_USER_NAME,
+            am_url=AM_URL,
+            enhanced_errors=True,
+        ).copy_metadata_files(*params)
+        assert (
+            errors.error_lookup(response)
+            == errors.error_codes[errors.ERR_INVALID_RESPONSE]
+        )
+        assert response.message == {
+            "error": True,
+            "message": "sip_uuid and source_paths[] both required.",
+        }
+
+    @vcr.use_cassette(
+        "fixtures/vcr_cassettes/copy_metadata_files_with_empty_sip_uuid.yaml",
+    )
+    def test_copy_metadata_files_with_empty_sip_uuid(self):
+        self._test_copy_metadata_files_with_empty_parameter(
+            "",
+            [
+                (
+                    "4d0de0aa-2658-4f21-bb09-d730b84b2b01",
+                    "/home/archivematica/archivematica-sampledata/metadata.csv",
+                ),
+            ],
+        )
+
+    @vcr.use_cassette(
+        "fixtures/vcr_cassettes/copy_metadata_files_with_empty_source_paths.yaml",
+    )
+    def test_copy_metadata_files_with_empty_source_paths(self):
+        self._test_copy_metadata_files_with_empty_parameter(
+            "f8beb140-3149-471c-861a-249e1d851c92", []
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
