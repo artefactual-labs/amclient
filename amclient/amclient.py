@@ -121,6 +121,11 @@ class AMClient(object):
         param: stream
         param: cli_call
         param: enhanced_errors
+        param: event_reason
+        param: pipeline_uuid
+        param: pipeline_uuids
+        param: ss_user_id
+        param: ss_user_email
         """
         for key, val in kwargs.items():
             setattr(self, key, val)
@@ -570,6 +575,33 @@ class AMClient(object):
 
     def download_aip(self):
         return self.download_package(self.aip_uuid)
+
+    def delete_package(
+        self, package_uuid, pipeline_uuid, event_reason, ss_user_id, ss_user_email
+    ):
+        """Create a deletion request for a package."""
+        params = {
+            "pipeline": pipeline_uuid,
+            "event_reason": event_reason,
+            "user_id": ss_user_id,
+            "user_email": ss_user_email,
+        }
+        url = "{}/api/v2/file/{}/delete_aip/".format(self.ss_url, package_uuid)
+        return utils._call_url_json(
+            url,
+            headers=self._ss_auth_headers(),
+            params=json.dumps(params),
+            method=utils.METHOD_POST,
+        )
+
+    def delete_aip(self):
+        return self.delete_package(
+            self.aip_uuid,
+            self.pipeline_uuid,
+            self.event_reason,
+            self.ss_user_id,
+            self.ss_user_email,
+        )
 
     def list_storage_locations(self):
         """List all Storage Service locations."""

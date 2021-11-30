@@ -52,6 +52,19 @@ LOCATION_PURPOSE = Arg(
     help='Purpose of storage space location valid choices: "AR", "AS", "CP", "DS", "SD", "SS", "BL", "TS", "RP"',
     type=None,
 )
+EVENT_REASON = Arg(
+    name="event_reason", help="Event reason for package deletion request", type=None
+)
+SS_USER_ID = Arg(
+    name="ss_user_id",
+    help="ID of Storage Service user making package deletion request, e.g. 1",
+    type=None,
+)
+SS_USER_EMAIL = Arg(
+    name="ss_user_email",
+    help="Email address of Storage Service user making package deletion request",
+    type=None,
+)
 # Reusable option constants (for CLI), E.g. arguments with reasonable defaults or are not required to complete an API call.
 Opt = namedtuple("Opt", ["name", "metavar", "help", "default", "type"])
 AM_URL = Opt(
@@ -261,6 +274,19 @@ SUBCOMMANDS = (
         help="Download the AIP with AIP_UUID.",
         args=(AIP_UUID, SS_API_KEY),
         opts=(SS_USER_NAME, SS_URL, DIRECTORY, OUTPUT_MODE),
+    ),
+    SubCommand(
+        name="delete-aip",
+        help="Create deletion request for the AIP with AIP_UUID.",
+        args=(
+            AIP_UUID,
+            SS_API_KEY,
+            PIPELINE_UUID,
+            EVENT_REASON,
+            SS_USER_ID,
+            SS_USER_EMAIL,
+        ),
+        opts=(SS_USER_NAME, SS_URL, OUTPUT_MODE),
     ),
     SubCommand(
         name="get-pipelines",

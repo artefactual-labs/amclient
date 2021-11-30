@@ -422,6 +422,40 @@ class TestAMClient(unittest.TestCase):
         ).download_aip()
         assert aip_path is None
 
+    @vcr.use_cassette("fixtures/vcr_cassettes/delete_aip_success.yaml")
+    def test_delete_aip_success(self):
+        """Test that we can request deletion of existing AIP."""
+        aip_uuid = "fccc77cf-2045-44ed-9ddc-b335c63d5f9a"
+        pipeline_uuid = "a49dce91-3dca-4228-a271-0327ea89afb6"
+        response = amclient.AMClient(
+            aip_uuid=aip_uuid,
+            ss_url=SS_URL,
+            ss_user_name=SS_USER_NAME,
+            ss_api_key=SS_API_KEY,
+            pipeline_uuid=pipeline_uuid,
+            event_reason="Testing that deletion request works",
+            ss_user_id="1",
+            ss_user_email="test@example.com",
+        ).delete_aip()
+        assert response["message"] == "Delete request created successfully."
+
+    @vcr.use_cassette("fixtures/vcr_cassettes/delete_aip_fail.yaml")
+    def test_delete_aip_fail(self):
+        """Test that we can try to delete an AIP that does not exist."""
+        aip_uuid = "bad-aip-uuid"
+        pipeline_uuid = "a49dce91-3dca-4228-a271-0327ea89afb6"
+        response = amclient.AMClient(
+            aip_uuid=aip_uuid,
+            ss_url=SS_URL,
+            ss_user_name=SS_USER_NAME,
+            ss_api_key=SS_API_KEY,
+            pipeline_uuid=pipeline_uuid,
+            event_reason="Testing when deletion request doesn't work",
+            ss_user_id="1",
+            ss_user_email="test@example.com",
+        ).delete_aip()
+        assert response == errors.ERR_INVALID_RESPONSE
+
     @vcr.use_cassette("fixtures/vcr_cassettes/completed_ingests_ingests.yaml")
     def test_completed_ingests_ingests(self):
         """Test getting completed ingests when there are completed ingests
