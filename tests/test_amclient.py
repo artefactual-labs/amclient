@@ -37,7 +37,7 @@ amclient = os.path.join(
 
 sys.path.append(amclient)
 
-from amclient import amclient, errors
+from amclient import amclient, errors, utils
 
 
 AM_URL = "http://192.168.168.192"
@@ -980,6 +980,27 @@ class TestAMClient(unittest.TestCase):
             # is as robust as possible, i.e. no stray bytes.
             assert hashlib.md5(stdout).hexdigest() == "7f42199657dea535b6ad1963a6c7a2ac"
 
+    @vcr.use_cassette("fixtures/vcr_cassettes/test_extract_aip_mets_file.yaml")
+    def test_extract_aip_mets_file(self):
+        """Test the result of downloading an individual file from a package in
+        the storage service.
+        """
+        with TmpDir(TMP_DIR):
+            package_uuid = "64f4cb73-60bc-49f2-ab75-d83c9365b7d3"
+            am = amclient.AMClient(
+                ss_api_key=SS_API_KEY,
+                ss_user_name=SS_USER_NAME,
+                ss_url=SS_URL,
+                directory=TMP_DIR,
+            )
+            am.aip_uuid = package_uuid
+            response = am.extract_aip_mets_file()
+            mets_filename = "METS.{}.xml".format(package_uuid)
+            file_ = os.path.join(TMP_DIR, mets_filename)
+            assert os.path.isfile(file_)
+            assert os.path.getsize(file_) == 119107
+            assert mets_filename in response.get("Content-Disposition", "")
+
     @vcr.use_cassette("fixtures/vcr_cassettes/jobs.yaml")
     def test_get_jobs(self):
         """Test getting the jobs ran for a transfer"""
@@ -1412,6 +1433,47 @@ class TestAMClient(unittest.TestCase):
         self._test_copy_metadata_files_with_empty_parameter(
             "f8beb140-3149-471c-861a-249e1d851c92", []
         )
+
+
+class TestUtils(unittest.TestCase):
+    """Test runner for utils helpers."""
+
+    def test_package_name_from_path(self):
+        """Test that package_name_from_path returns expected results."""
+        test_packages = [
+            {
+                "current_path": "/dev/null/tar_gz_package-473a9398-0024-4804-81da-38946040c8af.tar.gz",
+                "package_name": "tar_gz_package-473a9398-0024-4804-81da-38946040c8af",
+                "package_name_without_uuid": "tar_gz_package",
+            },
+            {
+                "current_path": "/dev/null/a.bz2.tricky.7z.package-473a9398-0024-4804-81da-38946040c8af.7z",
+                "package_name": "a.bz2.tricky.7z.package-473a9398-0024-4804-81da-38946040c8af",
+                "package_name_without_uuid": "a.bz2.tricky.7z.package",
+            },
+            {
+                "current_path": "/dev/null/uncompressed_package-3e0b3093-23ea-4937-9e2a-1fd806bb39b9",
+                "package_name": "uncompressed_package-3e0b3093-23ea-4937-9e2a-1fd806bb39b9",
+                "package_name_without_uuid": "uncompressed_package",
+            },
+        ]
+        for test_package in test_packages:
+            current_path = test_package["current_path"]
+
+            package_name_with_uuid = utils.package_name_from_path(current_path)
+            assert package_name_with_uuid == test_package["package_name"]
+
+            package_name_with_uuid = utils.package_name_from_path(
+                current_path, remove_uuid_suffix=False
+            )
+            assert package_name_with_uuid == test_package["package_name"]
+
+            package_name_without_uuid = utils.package_name_from_path(
+                current_path, remove_uuid_suffix=True
+            )
+            assert (
+                package_name_without_uuid == test_package["package_name_without_uuid"]
+            )
 
 
 if __name__ == "__main__":

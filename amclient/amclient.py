@@ -747,6 +747,24 @@ class AMClient(object):
                         file_.write(chunk)
             return response.headers
 
+    def extract_aip_mets_file(self):
+        """Extract the METS file for an AIP with provided UUID.
+
+        If stream is True then the raw response is provided to the caller, if
+        the caller is an API user. If the caller is the AMClient command-line
+        then the stream contents are output to the console.
+        """
+        self.package_uuid = self.aip_uuid
+        package_details = self.get_package(params={"uuid": self.aip_uuid})
+        try:
+            current_path = package_details["objects"][0]["current_path"]
+        except KeyError:
+            return errors.ERR_PARSE_JSON
+        self.relative_path = utils.relative_path_to_aip_mets_file(
+            self.aip_uuid, current_path
+        )
+        return self.extract_file()
+
     def list_location_purposes(self):
         """List valid location purposes in the Storage Service."""
         return {

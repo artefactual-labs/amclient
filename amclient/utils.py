@@ -10,6 +10,11 @@ import urllib3
 from six import binary_type, text_type
 
 try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
+
+try:
     import errors
 except ImportError:
     from amclient import errors
@@ -20,6 +25,23 @@ LOGGER = logging.getLogger("amclient")
 METHOD_GET = "GET"
 METHOD_POST = "POST"
 METHOD_DELETE = "DELETE"
+
+# Package UUID suffix is a single dash followed by a UUID v4 with hyphens.
+PACKAGE_UUID_SUFFIX_LENGTH = 37
+
+# Package extension constants here are copied from Storage Service's
+# storage_service.common.utils module.
+COMPRESS_EXTENSION_7Z = ".7z"
+COMPRESS_EXTENSION_BZIP2 = ".bz2"
+COMPRESS_EXTENSION_GZIP = ".gz"
+
+COMPRESS_EXTENSIONS = (
+    COMPRESS_EXTENSION_7Z,
+    COMPRESS_EXTENSION_BZIP2,
+    COMPRESS_EXTENSION_GZIP,
+)
+
+PACKAGE_EXTENSIONS = (".tar",) + COMPRESS_EXTENSIONS
 
 
 class Error(int):
@@ -164,3 +186,37 @@ except ImportError:
             return filename.decode(encoding)
         else:
             raise TypeError("expect bytes or str, not %s" % type(filename).__name__)
+
+
+def package_name_from_path(current_path, remove_uuid_suffix=False):
+    """Return name of package without file extensions from current path.
+    This helper works for all package types (e.g. transfer, AIP, AIC).
+    :param current_path: Current path to package.
+    :param remove_uuid_suffix: Optional boolean to additionally remove
+    UUID suffix.
+    :returns: Package name minus any file extensions.
+    """
+    path = Path(current_path)
+    name, chars_to_remove = path.name, 0
+    if remove_uuid_suffix is True:
+        chars_to_remove = PACKAGE_UUID_SUFFIX_LENGTH
+    for suffix in reversed(path.suffixes):
+        if suffix not in PACKAGE_EXTENSIONS:
+            break
+        chars_to_remove += len(suffix)
+    # Check if we have characters to remove to avoid accidentally
+    # returning an empty string with name[:-0].
+    if not chars_to_remove:
+        return name
+    return name[:-chars_to_remove]
+
+
+def relative_path_to_aip_mets_file(uuid, current_path):
+    """Return relative path to AIP METS file.
+    :param uuid: AIP UUID.
+    :param current_path: Current path to AIP.
+    :returns: Relative path to AIP METS file.
+    """
+    package_name_without_extensions = package_name_from_path(current_path)
+    mets_path = "{}/data/METS.{}.xml".format(package_name_without_extensions, uuid)
+    return mets_path
