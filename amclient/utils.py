@@ -125,7 +125,7 @@ def _call_url_json(
             data = _call_url(
                 url,
                 method=method,
-                data=params.encode("utf-8"),
+                data=params,
                 headers=headers,
                 assume_json=assume_json,
             )

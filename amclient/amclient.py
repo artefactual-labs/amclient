@@ -686,7 +686,7 @@ class AMClient(object):
         headers.update({"Content-Type": "text/csv; charset=utf-8"})
         return utils._call_url_json(
             url,
-            params=data,
+            params=data.encode("utf-8"),
             method=utils.METHOD_POST,
             headers=headers,
             enhanced_errors=getattr(self, "enhanced_errors", False),
