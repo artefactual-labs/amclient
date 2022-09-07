@@ -1316,7 +1316,7 @@ class TestAMClient(unittest.TestCase):
             assert client.validate_csv(validator, file_obj) == {"valid": "true"}
             mock_request.assert_called_once_with(
                 "POST",
-                data=file_contents,
+                data=file_contents.encode("utf-8"),
                 params=None,
                 headers=expected_headers,
                 url="{}/api/v2beta/validate/{}/".format(client.am_url, validator),
@@ -1337,7 +1337,7 @@ class TestAMClient(unittest.TestCase):
             assert result.message == error_message
             mock_request.assert_called_once_with(
                 "POST",
-                data=file_contents,
+                data=file_contents.encode("utf-8"),
                 params=None,
                 headers=expected_headers,
                 url="{}/api/v2beta/validate/{}/".format(client.am_url, validator),
