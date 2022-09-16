@@ -685,9 +685,10 @@ class AMClient(object):
         data = file_obj.read()
         headers = self._am_auth_headers()
         headers.update({"Content-Type": "text/csv; charset=utf-8"})
+        encoded_data = ensure_binary(data, encoding="utf-8")
         return utils._call_url_json(
             url,
-            params=ensure_binary(data, encoding="utf-8"),
+            params=encoded_data,
             method=utils.METHOD_POST,
             headers=headers,
             enhanced_errors=getattr(self, "enhanced_errors", False),
