@@ -55,7 +55,7 @@ setup(
     ],
     keywords="Archivematica API Archivematica-Storage-Service SDK",
     packages=find_packages(exclude=["fixtures", "requirements", "tests*"]),
-    install_requires=["requests<3", "six<2", "urllib3<2"],
+    install_requires=["requests<3", "urllib3<2"],
     include_package_data=True,
     python_requires=">=3.6",
     # Entry point for the amclient binary
