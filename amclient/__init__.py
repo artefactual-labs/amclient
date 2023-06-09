@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 # Import the primary AMClient script.
 from .amclient import AMClient
 

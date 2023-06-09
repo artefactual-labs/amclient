@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Defaults and constants for amclient.py and transfers.py
 import os
 import re
@@ -15,7 +13,7 @@ UUID_PATT = re.compile("^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9
 UNDECODABLE = "UNABLE TO DECODE"
 UNDEC_MSG = (
     "Unable to decode a transfer source component; giving up and"
-    " returning {0}".format(UNDECODABLE)
+    " returning {}".format(UNDECODABLE)
 )
 
 # Global for logfile if not set.

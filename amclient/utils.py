@@ -1,23 +1,11 @@
-# -*- coding: utf-8 -*-
-
 """Where you put stuff when you can't think of a good name for a module."""
-
 import logging
-import sys
+from pathlib import Path
 
 import requests
 import urllib3
-from six import binary_type, text_type
 
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
-
-try:
-    import errors
-except ImportError:
-    from amclient import errors
+from . import errors
 
 
 LOGGER = logging.getLogger("amclient")
@@ -155,39 +143,6 @@ def _call_url_json(
     return data
 
 
-try:
-    from os import fsencode, fsdecode
-except ImportError:
-    # Cribbed & modified from Python3's OS module to support Python2
-    def fsencode(filename):
-        """Encode path-like filename to the filesystem encoding.
-
-        See https://docs.python.org/3/library/os.html#os.fsencode for more
-        details.
-        """
-        encoding = sys.getfilesystemencoding()
-        if isinstance(filename, binary_type):
-            return filename
-        elif isinstance(filename, text_type):
-            return filename.encode(encoding)
-        else:
-            raise TypeError("expect bytes or str, not %s" % type(filename).__name__)
-
-    def fsdecode(filename):
-        """Decode the path-like filename from the filesystem encoding.
-
-        See https://docs.python.org/3/library/os.html#os.fsdecode for more
-        details.
-        """
-        encoding = sys.getfilesystemencoding()
-        if isinstance(filename, text_type):
-            return filename
-        elif isinstance(filename, binary_type):
-            return filename.decode(encoding)
-        else:
-            raise TypeError("expect bytes or str, not %s" % type(filename).__name__)
-
-
 def package_name_from_path(current_path, remove_uuid_suffix=False):
     """Return name of package without file extensions from current path.
     This helper works for all package types (e.g. transfer, AIP, AIC).
@@ -218,5 +173,5 @@ def relative_path_to_aip_mets_file(uuid, current_path):
     :returns: Relative path to AIP METS file.
     """
     package_name_without_extensions = package_name_from_path(current_path)
-    mets_path = "{}/data/METS.{}.xml".format(package_name_without_extensions, uuid)
+    mets_path = f"{package_name_without_extensions}/data/METS.{uuid}.xml"
     return mets_path
