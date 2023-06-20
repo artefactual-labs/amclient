@@ -3,41 +3,25 @@
     $ python -m unittest tests.test_amclient
 
 """
-from __future__ import unicode_literals
-
-from binascii import hexlify
 import collections
-from contextlib import contextmanager
 import hashlib
 import os
-import pytest
 import shutil
 import sys
 import unittest
 import uuid
+from binascii import hexlify
+from contextlib import contextmanager
+from io import BytesIO
+from unittest import mock
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
+import pytest
 import requests
-import six
 import vcr
 
-try:
-    from StringIO import BytesIO  # for Python 2
-except ImportError:
-    from io import BytesIO  # for Python 3
-
-
-amclient = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "amclient"
-)
-
-sys.path.append(amclient)
-
-from amclient import amclient, errors, utils
+from amclient import amclient
+from amclient import errors
+from amclient import utils
 
 
 AM_URL = "http://192.168.168.192"
@@ -369,8 +353,7 @@ class TestAMClient(unittest.TestCase):
                 directory=TMP_DIR,
             ).download_dip()
             assert (
-                dip_path
-                == "{}/package-c0e37bab-e51e-482d-a066-a277330de9a7.7z".format(TMP_DIR)
+                dip_path == f"{TMP_DIR}/package-c0e37bab-e51e-482d-a066-a277330de9a7.7z"
             )
             assert os.path.isfile(dip_path)
 
@@ -403,7 +386,7 @@ class TestAMClient(unittest.TestCase):
                 ss_api_key=ss_api_key,
                 directory=TMP_DIR,
             ).download_aip()
-            assert aip_path == "{}/{}-{}.7z".format(TMP_DIR, transfer_name, aip_uuid)
+            assert aip_path == f"{TMP_DIR}/{transfer_name}-{aip_uuid}.7z"
             assert os.path.isfile(aip_path)
 
     @vcr.use_cassette("fixtures/vcr_cassettes/download_aip_fail.yaml")
@@ -947,7 +930,7 @@ class TestAMClient(unittest.TestCase):
             ).extract_file()
             # We have a stream, check we have an iterator and some content.
             assert (
-                hexlify(six.next(response.iter_content(chunk_size=14)))
+                hexlify(next(response.iter_content(chunk_size=14)))
                 == b"49443303000000001f7654495432"
             )
             assert response.headers.get("Content-Length") == "5992608"
@@ -995,7 +978,7 @@ class TestAMClient(unittest.TestCase):
             )
             am.aip_uuid = package_uuid
             response = am.extract_aip_mets_file()
-            mets_filename = "METS.{}.xml".format(package_uuid)
+            mets_filename = f"METS.{package_uuid}.xml"
             file_ = os.path.join(TMP_DIR, mets_filename)
             assert os.path.isfile(file_)
             assert os.path.getsize(file_) == 119107
@@ -1037,7 +1020,7 @@ class TestAMClient(unittest.TestCase):
             "Sanitize Transfer name",
             "Sanitize object's file and directory names",
         ]
-        microservice_jobs = sorted([job["name"] for job in response])
+        microservice_jobs = sorted(job["name"] for job in response)
         assert microservice_jobs == expected_jobs
         # Test filtering jobs by link_uuid
         response = amclient.AMClient(
@@ -1060,7 +1043,7 @@ class TestAMClient(unittest.TestCase):
         assert len(response) == 1
         assert response[0]["name"] == "Verify metadata directory checksums"
 
-    @mock.patch("utils.requests.request")
+    @mock.patch("requests.request")
     def test_get_status(self, mock_request):
         transfer_uuid = "ca480d94-892c-4d99-bbb1-290698406571"
         sip_uuid = "e8e13e0c-1b26-451a-a343-38ae5b8c3d3e"
@@ -1076,7 +1059,7 @@ class TestAMClient(unittest.TestCase):
             data=None,
             headers=client._am_auth_headers(),
             params=None,
-            url="{}/api/transfer/status/{}".format(client.am_url, transfer_uuid),
+            url=f"{client.am_url}/api/transfer/status/{transfer_uuid}",
         )
         mock_request.reset_mock()
 
@@ -1091,7 +1074,7 @@ class TestAMClient(unittest.TestCase):
             data=None,
             headers=client._am_auth_headers(),
             params=None,
-            url="{}/api/transfer/status/{}".format(client.am_url, transfer_uuid),
+            url=f"{client.am_url}/api/transfer/status/{transfer_uuid}",
         )
         mock_request.reset_mock()
 
@@ -1108,14 +1091,14 @@ class TestAMClient(unittest.TestCase):
             data=None,
             headers=client._am_auth_headers(),
             params=None,
-            url="{}/api/transfer/status/{}".format(client.am_url, transfer_uuid),
+            url=f"{client.am_url}/api/transfer/status/{transfer_uuid}",
         )
         mock_request.assert_any_call(
             "GET",
             data=None,
             headers=client._am_auth_headers(),
             params=None,
-            url="{}/api/ingest/status/{}".format(client.am_url, sip_uuid),
+            url=f"{client.am_url}/api/ingest/status/{sip_uuid}",
         )
         mock_request.reset_mock()
 
@@ -1143,10 +1126,10 @@ class TestAMClient(unittest.TestCase):
         test_path_2 = os.path.join("this", "is", "another", "path")
         pipeline_uuid_1 = "d6aeb4e0-e836-4768-8225-26e5720950d3"
         pipeline_uuid_2 = "26bda073-753b-42bd-b312-f39b7db4921d"
-        uri_pipeline_1 = "{}{}/".format(pipeline_uri_pattern, pipeline_uuid_1)
-        uri_pipeline_2 = "{}{}/".format(pipeline_uri_pattern, pipeline_uuid_2)
+        uri_pipeline_1 = f"{pipeline_uri_pattern}{pipeline_uuid_1}/"
+        uri_pipeline_2 = f"{pipeline_uri_pattern}{pipeline_uuid_2}/"
         space_uuid = "30226523-c759-443f-95c9-0fa813034731"
-        uri_space = "{}{}/".format(space_uri_pattern, space_uuid)
+        uri_space = f"{space_uri_pattern}{space_uuid}/"
 
         # Create a transfer-source and assign it to two pipelines.
         response = amclient.AMClient(
@@ -1155,7 +1138,7 @@ class TestAMClient(unittest.TestCase):
             ss_url=SS_URL,
             location_purpose=purpose_transfer,
             location_description=test_desc,
-            pipeline_uuids="{},{}".format(pipeline_uuid_1, pipeline_uuid_2),
+            pipeline_uuids=f"{pipeline_uuid_1},{pipeline_uuid_2}",
             space_uuid=space_uuid,
             default=False,
             space_relative_path=test_path_1,
@@ -1293,7 +1276,7 @@ class TestAMClient(unittest.TestCase):
             == amclient.AMClient().list_location_purposes()
         )
 
-    @mock.patch("utils.requests.request")
+    @mock.patch("requests.request")
     def test_validate_csv(self, mock_request):
         client = amclient.AMClient(
             am_api_key=AM_API_KEY, am_user_name=AM_USER_NAME, am_url=AM_URL
@@ -1306,7 +1289,7 @@ class TestAMClient(unittest.TestCase):
         expected_headers = client._am_auth_headers()
         expected_headers.update({"Content-Type": "text/csv; charset=utf-8"})
 
-        file_obj = open(filepath, "r")
+        file_obj = open(filepath)
         file_contents = file_obj.read()
 
         # file is valid
@@ -1319,7 +1302,7 @@ class TestAMClient(unittest.TestCase):
                 data=file_contents.encode("utf-8"),
                 params=None,
                 headers=expected_headers,
-                url="{}/api/v2beta/validate/{}/".format(client.am_url, validator),
+                url=f"{client.am_url}/api/v2beta/validate/{validator}/",
             )
             mock_request.reset_mock()
 
@@ -1340,7 +1323,7 @@ class TestAMClient(unittest.TestCase):
                 data=file_contents.encode("utf-8"),
                 params=None,
                 headers=expected_headers,
-                url="{}/api/v2beta/validate/{}/".format(client.am_url, validator),
+                url=f"{client.am_url}/api/v2beta/validate/{validator}/",
             )
             mock_request.reset_mock()
 

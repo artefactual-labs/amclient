@@ -1,16 +1,10 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 # Archivematica Client Argument Parser
-
 import argparse
 from collections import namedtuple
 
-try:
-    import defaults
-    import version
-except ImportError:
-    from amclient import defaults, version
+from . import defaults
+from . import version
 
 # Reusable argument constants (for CLI), E.g. arguments without reasonable defaults and are required to complete an API call.
 Arg = namedtuple("Arg", ["name", "help", "type"])
@@ -70,14 +64,14 @@ Opt = namedtuple("Opt", ["name", "metavar", "help", "default", "type"])
 AM_URL = Opt(
     name="am-url",
     metavar="URL",
-    help="Archivematica URL. Default: {0}".format(defaults.DEF_AM_URL),
+    help=f"Archivematica URL. Default: {defaults.DEF_AM_URL}",
     default=defaults.DEF_AM_URL,
     type=None,
 )
 AM_USER_NAME = Opt(
     name="am-user-name",
     metavar="USERNAME",
-    help="Archivematica username. Default: {0}".format(defaults.DEF_USER_NAME),
+    help=f"Archivematica username. Default: {defaults.DEF_USER_NAME}",
     default=defaults.DEF_USER_NAME,
     type=None,
 )
@@ -98,14 +92,14 @@ OUTPUT_MODE = Opt(
 SS_URL = Opt(
     name="ss-url",
     metavar="URL",
-    help="Storage Service URL. Default: {0}".format(defaults.DEF_SS_URL),
+    help=f"Storage Service URL. Default: {defaults.DEF_SS_URL}",
     default=defaults.DEF_SS_URL,
     type=None,
 )
 SS_USER_NAME = Opt(
     name="ss-user-name",
     metavar="USERNAME",
-    help="Storage Service username. Default: {0}".format(defaults.DEF_USER_NAME),
+    help=f"Storage Service username. Default: {defaults.DEF_USER_NAME}",
     default=defaults.DEF_USER_NAME,
     type=None,
 )
@@ -119,7 +113,7 @@ TRANSFER_PATH = Opt(
 PROCESSING_CONFIG = Opt(
     name="processing-config",
     metavar="PROCESSING",
-    help="Processing configuration. Default: {0}".format(
+    help="Processing configuration. Default: {}".format(
         defaults.DEFAULT_PROCESSING_CONFIG
     ),
     default=defaults.DEFAULT_PROCESSING_CONFIG,
@@ -128,14 +122,14 @@ PROCESSING_CONFIG = Opt(
 REINGEST_TYPE = Opt(
     name="reingest-type",
     metavar="REINGEST",
-    help="Reingest type. Default: {0}".format(defaults.DEFAULT_REINGEST_TYPE),
+    help=f"Reingest type. Default: {defaults.DEFAULT_REINGEST_TYPE}",
     default=defaults.DEFAULT_REINGEST_TYPE,
     type=None,
 )
 TRANSFER_TYPE = Opt(
     name="transfer-type",
     metavar="TRANSFER",
-    help="Reingest type. Default: {0}".format(defaults.DEFAULT_TRANSFER_TYPE),
+    help=f"Reingest type. Default: {defaults.DEFAULT_TRANSFER_TYPE}",
     default=defaults.DEFAULT_TRANSFER_TYPE,
     type=None,
 )
@@ -417,7 +411,7 @@ def get_parser():
         "--version",
         "-v",
         action="version",
-        version="%(prog)s {}".format(version.version()),
+        version=f"%(prog)s {version.version()}",
     )
     subparsers = parser.add_subparsers(
         help="sub-command help", dest="subcommand", metavar="<command>"
