@@ -813,7 +813,7 @@ class TestAMClient(unittest.TestCase):
         ).list_storage_locations()
         count = response.get("meta").get("total_count")
         if not count:
-            assert False, "Cannot retrieve storage location count"
+            raise AssertionError("Cannot retrieve storage location count")
         assert len(response.get("objects", [])) == count, (
             "Failed to count the storage locations available and make the "
             "comparison with metadata"
@@ -846,7 +846,7 @@ class TestAMClient(unittest.TestCase):
         try:
             uuid.UUID(uuid_, version=4)
         except ValueError:
-            assert False
+            raise AssertionError()
         # Provide a test for an absolute path, over relative above.
         path = (
             "/home/archivematica/archivematica-sampledata/SampleTransfers/"
@@ -864,7 +864,7 @@ class TestAMClient(unittest.TestCase):
         try:
             uuid.UUID(uuid_, version=4)
         except ValueError:
-            assert False
+            raise AssertionError()
         # Provide a test for a non-standard transfer type
         path = "/archivematica/archivematica-sampledata/SampleTransfers/BagTransfer"
         response = amclient.AMClient(
@@ -881,7 +881,7 @@ class TestAMClient(unittest.TestCase):
         try:
             uuid.UUID(uuid_, version=4)
         except ValueError:
-            assert False
+            raise AssertionError()
 
     @vcr.use_cassette("fixtures/vcr_cassettes/test_extract_individual_file.yaml")
     def test_extract_individual_file(self):
