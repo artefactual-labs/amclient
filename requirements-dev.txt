@@ -19,15 +19,11 @@ coverage[toml]==7.3.2
 exceptiongroup==1.1.3
     # via pytest
 idna==3.4
-    # via
-    #   requests
-    #   yarl
+    # via requests
 importlib-metadata==6.8.0
     # via build
 iniconfig==2.0.0
     # via pytest
-multidict==6.0.4
-    # via yarl
 packaging==23.2
     # via
     #   build
@@ -44,8 +40,6 @@ pytest==7.4.3
     #   pytest-cov
 pytest-cov==4.1.0
     # via amclient (pyproject.toml)
-pyyaml==6.0.1
-    # via vcrpy
 requests==2.31.0
     # via amclient (pyproject.toml)
 tomli==2.0.1
@@ -55,19 +49,12 @@ tomli==2.0.1
     #   pip-tools
     #   pyproject-hooks
     #   pytest
-urllib3==1.26.18
+urllib3==2.0.7
     # via
     #   amclient (pyproject.toml)
     #   requests
-    #   vcrpy
-vcrpy==5.1.0
-    # via amclient (pyproject.toml)
 wheel==0.41.3
     # via pip-tools
-wrapt==1.15.0
-    # via vcrpy
-yarl==1.9.2
-    # via vcrpy
 zipp==3.17.0
     # via importlib-metadata
 
