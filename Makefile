@@ -26,3 +26,11 @@ clean:  ## Clean the package directory
 
 help:  ## Print this help message.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+pip-compile:  ## Compile pip requirements
+	pip-compile --allow-unsafe --output-file=requirements.txt pyproject.toml
+	pip-compile --allow-unsafe --extra=dev --output-file=requirements-dev.txt pyproject.toml
+
+pip-upgrade:  ## Upgrade pip requirements
+	pip-compile --allow-unsafe --upgrade --output-file=requirements.txt pyproject.toml
+	pip-compile --allow-unsafe --upgrade --extra=dev --output-file=requirements-dev.txt pyproject.toml
