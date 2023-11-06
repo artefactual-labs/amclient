@@ -1,8 +1,3 @@
-"""To run the tests::
-
-    $ python -m unittest tests.test_amclient
-
-"""
 import collections
 import hashlib
 import json
@@ -17,7 +12,6 @@ import requests
 
 from amclient import amclient
 from amclient import errors
-from amclient import utils
 
 
 AM_URL = "http://192.168.168.192"
@@ -28,51 +22,6 @@ SS_USER_NAME = "test"
 SS_API_KEY = "5de62f6f4817f903dcfac47fa5cffd44685a2cf2"
 TMP_DIR = ".tmp-downloads"
 TRANSFER_SOURCE_UUID = "7609101e-15b2-4f4f-a19d-7b23673ac93b"
-
-
-class TestAMClient(unittest.TestCase):
-    """Test runner for AMClient class."""
-
-
-class TestUtils(unittest.TestCase):
-    """Test runner for utils helpers."""
-
-    def test_package_name_from_path(self):
-        """Test that package_name_from_path returns expected results."""
-        test_packages = [
-            {
-                "current_path": "/dev/null/tar_gz_package-473a9398-0024-4804-81da-38946040c8af.tar.gz",
-                "package_name": "tar_gz_package-473a9398-0024-4804-81da-38946040c8af",
-                "package_name_without_uuid": "tar_gz_package",
-            },
-            {
-                "current_path": "/dev/null/a.bz2.tricky.7z.package-473a9398-0024-4804-81da-38946040c8af.7z",
-                "package_name": "a.bz2.tricky.7z.package-473a9398-0024-4804-81da-38946040c8af",
-                "package_name_without_uuid": "a.bz2.tricky.7z.package",
-            },
-            {
-                "current_path": "/dev/null/uncompressed_package-3e0b3093-23ea-4937-9e2a-1fd806bb39b9",
-                "package_name": "uncompressed_package-3e0b3093-23ea-4937-9e2a-1fd806bb39b9",
-                "package_name_without_uuid": "uncompressed_package",
-            },
-        ]
-        for test_package in test_packages:
-            current_path = test_package["current_path"]
-
-            package_name_with_uuid = utils.package_name_from_path(current_path)
-            assert package_name_with_uuid == test_package["package_name"]
-
-            package_name_with_uuid = utils.package_name_from_path(
-                current_path, remove_uuid_suffix=False
-            )
-            assert package_name_with_uuid == test_package["package_name"]
-
-            package_name_without_uuid = utils.package_name_from_path(
-                current_path, remove_uuid_suffix=True
-            )
-            assert (
-                package_name_without_uuid == test_package["package_name_without_uuid"]
-            )
 
 
 @mock.patch(
