@@ -9,7 +9,7 @@ package-source:                                 ## Package the source code
 	python3 setup.py sdist
 
 package-wheel: package-deps                     ## Package a Python wheel
-	python3 setup.py bdist_wheel --universal
+	python3 setup.py bdist_wheel
 
 package-check: package-source package-wheel     ## Check the distribution is valid
 	twine check dist/*
