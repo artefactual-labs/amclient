@@ -1,21 +1,18 @@
 .DEFAULT_GOAL := help
 
-.PHONY: clean package package-deps package-source package-upload package-wheel
+.PHONY: clean package package-deps package-distribution package-upload pip-compile pip-upgrade
 
-package-deps:                                   ## Upgrade dependencies for packaging
-	python3 -m pip install --upgrade twine wheel
+package-deps:  ## Upgrade dependencies for packaging
+	python3 -m pip install --upgrade build twine
 
-package-source:                                 ## Package the source code
-	python3 setup.py sdist
+package-distribution: package-deps  ## Create distribution packages
+	python3 -m build
 
-package-wheel: package-deps                     ## Package a Python wheel
-	python3 setup.py bdist_wheel --universal
+package-check: package-distribution  ## Check the distribution is valid
+	python3 -m twine check --strict dist/*
 
-package-check: package-source package-wheel     ## Check the distribution is valid
-	twine check dist/*
-
-package-upload: package-deps package-check      ## Upload package
-	twine upload dist/* --repository-url https://upload.pypi.org/legacy/
+package-upload: package-deps package-check  ## Upload distribution packages
+	python3 -m twine upload dist/* --repository-url https://upload.pypi.org/legacy/
 
 package: package-upload
 
@@ -24,5 +21,13 @@ clean:  ## Clean the package directory
 	rm -rf build/
 	rm -rf dist/
 
-help:  ## Print this help message.
+pip-compile:  ## Compile pip requirements
+	pip-compile --allow-unsafe --output-file=requirements.txt pyproject.toml
+	pip-compile --allow-unsafe --extra=dev --output-file=requirements-dev.txt pyproject.toml
+
+pip-upgrade:  ## Upgrade pip requirements
+	pip-compile --allow-unsafe --upgrade --output-file=requirements.txt pyproject.toml
+	pip-compile --allow-unsafe --upgrade --extra=dev --output-file=requirements-dev.txt pyproject.toml
+
+help:  ## Print this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
