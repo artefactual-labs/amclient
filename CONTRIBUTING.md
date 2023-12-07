@@ -10,12 +10,13 @@ submission!
 
 There are many ways to contribute:
 
-* submitting bug reports,
-* or writing code which can be incorporated into AMClient itself.
+- submitting bug reports,
+- or writing code which can be incorporated into AMClient itself.
+
+## Table of contents
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
 
 - [Submitting bugs](#submitting-bugs)
 - [Contribution standards](#contribution-standards)
@@ -28,7 +29,7 @@ There are many ways to contribute:
 ## Submitting bugs
 
 If you find a security vulnerability, do NOT open an issue. Email
-security@artefactual.com instead.
+<security@artefactual.com> instead.
 
 Issues should be filed in our collective
 [Archivematica related issues repository][am-issues]
@@ -39,12 +40,12 @@ mailing list is always welcome!
 
 Useful questions to answer if you're having problems include:
 
-* What version of AMClient are you using?
-* How was it installed?
-* How was AMClient being used when this issue occurred?
-* What was the expected outcome?
-* What was the actual outcome?
-* Can we reproduce this reliably?
+- What version of AMClient are you using?
+- How was it installed?
+- How was AMClient being used when this issue occurred?
+- What was the expected outcome?
+- What was the actual outcome?
+- Can we reproduce this reliably?
 
 ## Contribution standards
 
@@ -62,7 +63,7 @@ The Archivematica contributor's agreement is based almost verbatim on the
 [contributor license][contributor-license].
 
 If you have any questions or concerns about the Contributor's Agreement, please
-email us at agreement@artefactual.com to discuss them.
+email us at <agreement@artefactual.com> to discuss them.
 
 ### Why do I have to sign a Contributor's Agreement?
 
@@ -89,13 +90,15 @@ than fighting legal battles over contributions.
 
 Please print out, read, sign, and scan the
 [contributor agreement][contributors-agreement] and email it to
-agreement@artefactual.com. Alternatively, you may send an original signed
+<agreement@artefactual.com>. Alternatively, you may send an original signed
 agreement to:
 
-    Artefactual Systems Inc.
-    201 - 301 Sixth Street
-    New Westminster BC  V3L 3A7
-    Canada
+```text
+Artefactual Systems Inc.
+201 - 301 Sixth Street
+New Westminster BC  V3L 3A7
+Canada
+```
 
 [am-issues]: https://github.com/archivematica/issues
 [am-forum]: https://groups.google.com/forum/#!forum/archivematica
