@@ -1,4 +1,4 @@
-#  Contributing to AMClient
+# Contributing to AMClient
 
 Thank you for your interest in making a contribution to AMClient.
 
