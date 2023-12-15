@@ -31,5 +31,5 @@ repos:
   - id: doctoc
     files: |
       (?x)^(
-        CONTRIBUTING\.md
+        \.md
       )
