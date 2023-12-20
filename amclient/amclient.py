@@ -115,6 +115,7 @@ class AMClient:
         param: enhanced_errors
         param: event_reason
         param: pipeline_uuid
+        param: location_uuid
         param: pipeline_uuids
         param: ss_user_id
         param: ss_user_email
@@ -423,6 +424,15 @@ class AMClient:
         else:
             LOGGER.warning("Unable to download package %s", uuid)
 
+    def get_pipeline_details(self):
+        """SS GET /api/v2/pipeline/<uuid>. Retrieve the details of a specific
+        pipeline given a pipeline uuid.
+        """
+        return utils._call_url_json(
+            f"{self.ss_url}/api/v2/pipeline/{self.pipeline_uuid}",
+            headers=self._ss_auth_headers(),
+        )
+
     def get_pipelines(self):
         """GET Archivematica Pipelines (dashboard instances from the storage
         service.
@@ -587,6 +597,15 @@ class AMClient:
             self.event_reason,
             self.ss_user_id,
             self.ss_user_email,
+        )
+
+    def get_location_details(self):
+        """SS GET /api/v2/location/<uuid>. Retrieve the details of a specific
+        location given a location uuid.
+        """
+        return utils._call_url_json(
+            f"{self.ss_url}/api/v2/location/{self.location_uuid}",
+            headers=self._ss_auth_headers(),
         )
 
     def list_storage_locations(self):

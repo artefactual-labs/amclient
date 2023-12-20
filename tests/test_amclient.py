@@ -1892,6 +1892,80 @@ def test_reingest_non_aip(call_url: mock.Mock):
     "amclient.utils._call_url",
     side_effect=[
         {
+            "description": "Archivematica on am-local",
+            "remote_name": "http://192.168.168.192",
+            "resource_uri": "/api/v2/pipeline/23129471-09e3-467e-88b6-eb4714afb5ac/",
+            "uuid": "23129471-09e3-467e-88b6-eb4714afb5ac",
+        }
+    ],
+)
+def test_get_pipeline_details(call_url: mock.Mock):
+    """Test that amclient can retrieve details about a pipeline."""
+    pipeline_uuid = "23129471-09e3-467e-88b6-eb4714afb5ac"
+    response = amclient.AMClient(
+        ss_api_key=SS_API_KEY,
+        ss_user_name=SS_USER_NAME,
+        ss_url=SS_URL,
+        pipeline_uuid=pipeline_uuid,
+    ).get_pipeline_details()
+
+    description = response["description"]
+    remote_name = response["remote_name"]
+    resource_uri = response["resource_uri"]
+    uuid = response["uuid"]
+
+    assert description == "Archivematica on am-local"
+    assert remote_name == AM_URL
+    assert resource_uri == "/api/v2/pipeline/23129471-09e3-467e-88b6-eb4714afb5ac/"
+    assert uuid == pipeline_uuid
+
+    assert call_url.mock_calls == [
+        mock.call(
+            f"{SS_URL}/api/v2/pipeline/23129471-09e3-467e-88b6-eb4714afb5ac",
+            method="GET",
+            params=None,
+            headers={"Authorization": f"ApiKey {SS_USER_NAME}:{SS_API_KEY}"},
+            assume_json=True,
+        )
+    ]
+
+
+@mock.patch(
+    "amclient.utils._call_url",
+    side_effect=[
+        requests.exceptions.HTTPError(response=mock.Mock(**{"status_code": 404})),
+    ],
+)
+def test_get_pipeline_details_invalid_uuid(call_url: mock.Mock):
+    """Test amlient's response when an invalid pipeline uuid is provided to
+    the get pipeline details endpoint.
+    """
+    pipeline_uuid = "23129471-baad-f00d-88b6-eb4714afb5ac"
+    response = amclient.AMClient(
+        ss_api_key=SS_API_KEY,
+        ss_user_name=SS_USER_NAME,
+        ss_url=SS_URL,
+        pipeline_uuid=pipeline_uuid,
+    ).get_pipeline_details()
+    assert (
+        errors.error_lookup(response) == errors.error_codes[errors.ERR_INVALID_RESPONSE]
+    )
+
+    assert call_url.mock_calls == [
+        mock.call(
+            f"{SS_URL}/api/v2/pipeline/23129471-baad-f00d-88b6-eb4714afb5ac",
+            method="GET",
+            params=None,
+            headers={"Authorization": f"ApiKey {SS_USER_NAME}:{SS_API_KEY}"},
+            assume_json=True,
+        )
+    ]
+
+
+@mock.patch(
+    "amclient.utils._call_url",
+    side_effect=[
+        {
             "package_type": "AIP",
             "status": "UPLOADED",
         }
@@ -2092,6 +2166,101 @@ def test_get_default_storage_locations(call_url: mock.Mock):
             headers={"Authorization": f"ApiKey {SS_USER_NAME}:{SS_API_KEY}"},
             assume_json=True,
         ),
+    ]
+
+
+@mock.patch(
+    "amclient.utils._call_url",
+    side_effect=[
+        {
+            "description": "Store AIP in standard Archivematica Directory",
+            "enabled": True,
+            "path": "/var/archivematica/sharedDirectory/www/AIPsStore",
+            "pipeline": ["/api/v2/pipeline/788ca0fa-eb38-4a16-8cf3-976b2d867a5f/"],
+            "purpose": "AS",
+            "quota": None,
+            "relative_path": "var/archivematica/sharedDirectory/www/AIPsStore",
+            "resource_uri": "/api/v2/location/23129471-09e3-467e-88b6-eb4714afb5ac/",
+            "space": "/api/v2/space/1a8b19d3-34a3-4800-ab1c-3aee2d195e47/",
+            "used": 7954625,
+            "uuid": "23129471-09e3-467e-88b6-eb4714afb5ac",
+        }
+    ],
+)
+def test_get_location_details(call_url: mock.Mock):
+    """Test that amclient can retrieve details about a location."""
+    location_uuid = "23129471-09e3-467e-88b6-eb4714afb5ac"
+    response = amclient.AMClient(
+        ss_api_key=SS_API_KEY,
+        ss_user_name=SS_USER_NAME,
+        ss_url=SS_URL,
+        location_uuid=location_uuid,
+    ).get_location_details()
+
+    description = response["description"]
+    enabled = response["enabled"]
+    path = response["path"]
+    pipeline = response["pipeline"]
+    purpose = response["purpose"]
+    quota = response["quota"]
+    relative_path = response["relative_path"]
+    resource_uri = response["resource_uri"]
+    space = response["space"]
+    used = response["used"]
+    uuid = response["uuid"]
+
+    assert description == "Store AIP in standard Archivematica Directory"
+    assert enabled is True
+    assert path == "/var/archivematica/sharedDirectory/www/AIPsStore"
+    assert pipeline == ["/api/v2/pipeline/788ca0fa-eb38-4a16-8cf3-976b2d867a5f/"]
+    assert purpose == "AS"
+    assert quota is None
+    assert relative_path == "var/archivematica/sharedDirectory/www/AIPsStore"
+    assert resource_uri == "/api/v2/location/23129471-09e3-467e-88b6-eb4714afb5ac/"
+    assert space == "/api/v2/space/1a8b19d3-34a3-4800-ab1c-3aee2d195e47/"
+    assert used == 7954625
+    assert uuid == "23129471-09e3-467e-88b6-eb4714afb5ac"
+
+    assert call_url.mock_calls == [
+        mock.call(
+            f"{SS_URL}/api/v2/location/23129471-09e3-467e-88b6-eb4714afb5ac",
+            method="GET",
+            params=None,
+            headers={"Authorization": f"ApiKey {SS_USER_NAME}:{SS_API_KEY}"},
+            assume_json=True,
+        )
+    ]
+
+
+@mock.patch(
+    "amclient.utils._call_url",
+    side_effect=[
+        requests.exceptions.HTTPError(response=mock.Mock(**{"status_code": 404})),
+    ],
+)
+def test_get_location_details_invalid_uuid(call_url: mock.Mock):
+    """Test amlient's response when an invalid location uuid is provided to
+    the get location details endpoint.
+    """
+    location_uuid = "23129471-baad-f00d-88b6-eb4714afb5ac"
+    response = amclient.AMClient(
+        ss_api_key=SS_API_KEY,
+        ss_user_name=SS_USER_NAME,
+        ss_url=SS_URL,
+        location_uuid=location_uuid,
+    ).get_location_details()
+    assert (
+        errors.error_lookup(response) == errors.error_codes[errors.ERR_INVALID_RESPONSE]
+    )
+
+    assert call_url.mock_calls == [
+        mock.call(
+            f"{SS_URL}/api/v2/location/23129471-baad-f00d-88b6-eb4714afb5ac",
+            method="GET",
+            params=None,
+            headers={"Authorization": f"ApiKey {SS_USER_NAME}:{SS_API_KEY}"},
+            assume_json=True,
+        )
     ]
 
 
