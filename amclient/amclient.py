@@ -152,7 +152,7 @@ class AMClient:
                         self.stdout(res)
             except requests.exceptions.InvalidURL:
                 self.stdout(errors.error_lookup(errors.ERR_INVALID_URL))
-            except BaseException:
+            except Exception:
                 self.stdout(errors.error_lookup(errors.ERR_CLIENT_UNKNOWN))
         else:
             raise AttributeError(f"AMClient has no method {name}")
