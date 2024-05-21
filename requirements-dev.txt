@@ -12,11 +12,11 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via pip-tools
-coverage[toml]==7.4.4
+coverage[toml]==7.5.1
     # via
     #   amclient (pyproject.toml)
     #   pytest-cov
-exceptiongroup==1.2.0
+exceptiongroup==1.2.1
     # via pytest
 idna==3.7
     # via requests
@@ -30,26 +30,25 @@ packaging==24.0
     #   pytest
 pip-tools==7.4.1
     # via amclient (pyproject.toml)
-pluggy==1.4.0
+pluggy==1.5.0
     # via pytest
-pyproject-hooks==1.0.0
+pyproject-hooks==1.1.0
     # via
     #   build
     #   pip-tools
-pytest==8.1.1
+pytest==8.2.1
     # via
     #   amclient (pyproject.toml)
     #   pytest-cov
 pytest-cov==5.0.0
     # via amclient (pyproject.toml)
-requests==2.31.0
+requests==2.32.1
     # via amclient (pyproject.toml)
 tomli==2.0.1
     # via
     #   build
     #   coverage
     #   pip-tools
-    #   pyproject-hooks
     #   pytest
 urllib3==2.2.1
     # via
@@ -57,11 +56,11 @@ urllib3==2.2.1
     #   requests
 wheel==0.43.0
     # via pip-tools
-zipp==3.18.1
+zipp==3.18.2
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==24.0
     # via pip-tools
-setuptools==69.3.0
+setuptools==70.0.0
     # via pip-tools
