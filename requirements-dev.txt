@@ -42,7 +42,7 @@ pytest==8.1.1
     #   pytest-cov
 pytest-cov==5.0.0
     # via amclient (pyproject.toml)
-requests==2.31.0
+requests==2.32.0
     # via amclient (pyproject.toml)
 tomli==2.0.1
     # via
