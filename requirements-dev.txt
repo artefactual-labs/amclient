@@ -50,7 +50,7 @@ tomli==2.0.1
     #   coverage
     #   pip-tools
     #   pytest
-urllib3==2.2.1
+urllib3==2.2.2
     # via
     #   amclient (pyproject.toml)
     #   requests
