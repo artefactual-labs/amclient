@@ -13,7 +13,6 @@ import requests
 from amclient import amclient
 from amclient import errors
 
-
 AM_URL = "http://192.168.168.192"
 SS_URL = "http://192.168.168.192:8000"
 AM_USER_NAME = "test"
@@ -1822,11 +1821,9 @@ def test_reingest_aip(call_url: mock.Mock):
     message = response["message"]
     assert error is False
     assert message == (
-        "Package {aip_uuid} sent "
+        f"Package {aip_uuid} sent "
         "to pipeline Archivematica on 4e2f66a7a29f "
-        "({pipeline_uuid}) for re-ingest".format(
-            aip_uuid=aip_uuid, pipeline_uuid=pipeline_uuid
-        )
+        f"({pipeline_uuid}) for re-ingest"
     )
 
     assert call_url.mock_calls == [
@@ -2399,9 +2396,7 @@ def test_extract_individual_file(requests_get: mock.Mock, tmp_path):
     tmp_dir.mkdir()
     filename_to_test = "bird.mp3"
     package_uuid = "2ad1bf0d-23fa-44e0-a128-9feadfe22c42"
-    path = "amclient-transfer_1-{}/data/objects/{}".format(
-        package_uuid, filename_to_test
-    )
+    path = f"amclient-transfer_1-{package_uuid}/data/objects/{filename_to_test}"
     filename = "bird_download.mp3"
     response = amclient.AMClient(
         ss_api_key=SS_API_KEY,
@@ -2454,9 +2449,7 @@ def test_extract_and_stream_individual_file(requests_get: mock.Mock, tmp_path):
     tmp_dir.mkdir()
     filename_to_test = "bird.mp3"
     package_uuid = "2ad1bf0d-23fa-44e0-a128-9feadfe22c42"
-    path = "amclient-transfer_1-{}/data/objects/{}".format(
-        package_uuid, filename_to_test
-    )
+    path = f"amclient-transfer_1-{package_uuid}/data/objects/{filename_to_test}"
     response = amclient.AMClient(
         ss_api_key=SS_API_KEY,
         ss_user_name=SS_USER_NAME,
@@ -2509,9 +2502,7 @@ def test_extract_and_stream_individual_file_cli(
     tmp_dir.mkdir()
     filename_to_test = "bird.mp3"
     package_uuid = "2ad1bf0d-23fa-44e0-a128-9feadfe22c42"
-    path = "amclient-transfer_1-{}/data/objects/{}".format(
-        package_uuid, filename_to_test
-    )
+    path = f"amclient-transfer_1-{package_uuid}/data/objects/{filename_to_test}"
     amclient.AMClient(
         ss_api_key=SS_API_KEY,
         ss_user_name=SS_USER_NAME,

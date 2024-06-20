@@ -1,4 +1,5 @@
 """Where you put stuff when you can't think of a good name for a module."""
+
 import logging
 from pathlib import Path
 
@@ -6,7 +7,6 @@ import requests
 import urllib3
 
 from . import errors
-
 
 LOGGER = logging.getLogger("amclient")
 
