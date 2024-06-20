@@ -113,9 +113,7 @@ TRANSFER_PATH = Opt(
 PROCESSING_CONFIG = Opt(
     name="processing-config",
     metavar="PROCESSING",
-    help="Processing configuration. Default: {}".format(
-        defaults.DEFAULT_PROCESSING_CONFIG
-    ),
+    help=f"Processing configuration. Default: {defaults.DEFAULT_PROCESSING_CONFIG}",
     default=defaults.DEFAULT_PROCESSING_CONFIG,
     type=None,
 )

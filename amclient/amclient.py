@@ -4,6 +4,7 @@
 Module and CLI that holds functionality for interacting with the various
 Archivematica APIs.
 """
+
 import base64
 import binascii
 import io
@@ -218,7 +219,7 @@ class AMClient:
         if _completed_units is None:
             msg = (
                 "Something went wrong when attempting to retrieve the"
-                " completed {}s.".format(unit_type)
+                f" completed {unit_type}s."
             )
             LOGGER.warning(msg)
         else:
@@ -500,9 +501,7 @@ class AMClient:
         return the default processing config from the AM server.
         """
         return utils._call_url_json(
-            "{}/api/processing-configuration/{}".format(
-                self.am_url, self.processing_config
-            ),
+            f"{self.am_url}/api/processing-configuration/{self.processing_config}",
             headers=self._am_auth_headers(),
             assume_json=assume_json,
         )
@@ -682,9 +681,7 @@ class AMClient:
         url = f"{self.am_url}/api/v2beta/validate/{validator}/"
         if not (isinstance(file_obj, io.TextIOBase) or hasattr(file_obj, "read")):
             raise TypeError(
-                "Expected an io.TextIOWrapper file object but got {} instead".format(
-                    type(file_obj)
-                )
+                f"Expected an io.TextIOWrapper file object but got {type(file_obj)} instead"
             )
         data = file_obj.read()
         headers = self._am_auth_headers()
@@ -720,9 +717,7 @@ class AMClient:
         then the stream contents are output to the console.
         """
         self.output_mode = ""  # TODO: don't overwrite mode
-        url = "{}/api/v2/file/{}/extract_file/?relative_path_to_file={}".format(
-            self.ss_url, self.package_uuid, self.relative_path
-        )
+        url = f"{self.ss_url}/api/v2/file/{self.package_uuid}/extract_file/?relative_path_to_file={self.relative_path}"
         response = requests.get(url, params=self._ss_auth(), stream=True)
         if getattr(self, "stream", None):
             if getattr(self, "cli_call", None):
@@ -787,7 +782,7 @@ class AMClient:
 
     def create_location(self):
         """Create a new location in the Storage Service."""
-        if not self.location_purpose.upper() in self.list_location_purposes():
+        if self.location_purpose.upper() not in self.list_location_purposes():
             return {
                 "error": "location purpose not permitted",
                 "valid_purposes": self.list_location_purposes(),
