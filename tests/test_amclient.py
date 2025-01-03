@@ -4,7 +4,6 @@ import os
 import unittest
 import uuid
 from binascii import hexlify
-from typing import Dict
 from unittest import mock
 
 import pytest
@@ -1371,7 +1370,7 @@ def test_close_completed_ingests_ingests(call_url: mock.Mock):
         },
     ],
 )
-def test_hide_units(call_url: mock.Mock, fixture: Dict):
+def test_hide_units(call_url: mock.Mock, fixture: dict):
     """Test the hiding of a unit type (transfer or ingest) via the
     Archivematica API.
     """
