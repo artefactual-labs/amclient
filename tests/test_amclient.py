@@ -1579,7 +1579,7 @@ def test_get_transfer_status_invalid_uuid(call_url: mock.Mock):
     message = response["message"]
     message_type = response["type"]
     assert message == (
-        "Cannot fetch unitTransfer with UUID 7bffc8f7-" "baad-f00d-8120-b1c51c2ab5db"
+        "Cannot fetch unitTransfer with UUID 7bffc8f7-baad-f00d-8120-b1c51c2ab5db"
     )
     assert message_type == "transfer"
 
@@ -2290,9 +2290,7 @@ def test_create_package_endpoint(call_url: mock.Mock):
     except ValueError:
         raise AssertionError()
     # Provide a test for an absolute path, over relative above.
-    path = (
-        "/home/archivematica/archivematica-sampledata/SampleTransfers/" "DemoTransfer"
-    )
+    path = "/home/archivematica/archivematica-sampledata/SampleTransfers/DemoTransfer"
     response = amclient.AMClient(
         am_api_key=AM_API_KEY,
         am_user_name=AM_USER_NAME,
@@ -2918,15 +2916,15 @@ def test_create_location(call_url: mock.Mock):
 
     assert response.get("description") == test_desc, "Description returned is incorrect"
     assert response.get("relative_path") == test_path_1, "Path returned is incorrect"
-    assert uri_pipeline_1 and uri_pipeline_2 in response.get(
-        "pipeline"
-    ), "The specified pipelines are not in the API response"
+    assert uri_pipeline_1 and uri_pipeline_2 in response.get("pipeline"), (
+        "The specified pipelines are not in the API response"
+    )
     assert response.get("resource_uri"), "Resource URI is not in response as expected"
     assert response.get("uuid"), "UUID for the new location not returned"
     assert response.get("default") is False, "Space default has returned incorrectly"
-    assert (
-        response.get("purpose") == purpose_transfer
-    ), "Incorrect purpose assigned to newly created location"
+    assert response.get("purpose") == purpose_transfer, (
+        "Incorrect purpose assigned to newly created location"
+    )
     assert response.get("space") == uri_space, "Incorrect URI for our space returned"
 
     # Create an archival storage location and assign it to one pipeline.
@@ -2947,9 +2945,9 @@ def test_create_location(call_url: mock.Mock):
     assert uri_pipeline_1 in response.get("pipeline")
     assert len(response.get("pipeline")) == 1
     assert response.get("default") is True
-    assert (
-        response.get("purpose") == purpose_aip_storage
-    ), "Incorrect purpose assigned to newly created location"
+    assert response.get("purpose") == purpose_aip_storage, (
+        "Incorrect purpose assigned to newly created location"
+    )
 
     # Create a DIP storage location and provide no description.
     response = amclient.AMClient(
@@ -2965,9 +2963,9 @@ def test_create_location(call_url: mock.Mock):
     ).create_location()
 
     assert response.get("description") == ""
-    assert (
-        response.get("purpose") == purpose_dip_storage
-    ), "Incorrect purpose assigned to newly created location"
+    assert response.get("purpose") == purpose_dip_storage, (
+        "Incorrect purpose assigned to newly created location"
+    )
 
     assert call_url.mock_calls == [
         mock.call(
