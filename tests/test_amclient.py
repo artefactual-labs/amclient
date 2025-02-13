@@ -2763,6 +2763,55 @@ def test_get_jobs(call_url: mock.Mock):
     ]
 
 
+@pytest.mark.parametrize(
+    "set_detailed_param", [(True,), (False)], ids=["detailed_set", "detailed_not_set"]
+)
+@mock.patch("amclient.utils._call_url")
+def test_get_jobs_returns_detailed_tasks(call_url: mock.Mock, set_detailed_param: bool):
+    unit_uuid = str(uuid.uuid4())
+    expected_tasks = [
+        {
+            "uuid": str(uuid.uuid4()),
+            "exit_code": 0,
+            "file_uuid": str(uuid.uuid4()),
+            "file_name": "file.pdf",
+            "time_created": "2025-02-13 12:00:00",
+            "time_started": "2025-02-13 12:00:00",
+            "time_ended": "2025-02-13 12:00:10",
+            "duration": 10,
+        }
+    ]
+    call_url.side_effect = [[{"tasks": expected_tasks}]]
+    client = amclient.AMClient(
+        am_api_key=AM_API_KEY,
+        am_user_name=AM_USER_NAME,
+        am_url=AM_URL,
+        unit_uuid=unit_uuid,
+    )
+    expected_params = {}
+    if set_detailed_param:
+        # Demonstrates that any value can be used, as the API endpoint only
+        # checks for the presence of the attribute in the request.
+        client.detailed = object()
+        expected_params["detailed"] = client.detailed
+
+    response = client.get_jobs()
+
+    assert len(response) == 1
+    assert response[0]["tasks"] == expected_tasks
+
+    # Since this test mocks the API endpoint interaction, this assertion
+    # serves as the real test verifying whether the 'detailed' parameter has
+    # been correctly set.
+    call_url.assert_called_once_with(
+        f"{AM_URL}/api/v2beta/jobs/{unit_uuid}",
+        method="GET",
+        params=expected_params,
+        headers={"Authorization": f"ApiKey {AM_USER_NAME}:{AM_API_KEY}"},
+        assume_json=True,
+    )
+
+
 @mock.patch("requests.request")
 def test_get_status(mock_request: mock.Mock):
     transfer_uuid = "ca480d94-892c-4d99-bbb1-290698406571"

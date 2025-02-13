@@ -626,6 +626,8 @@ class AMClient:
             value = getattr(self, f"job_{attribute}", None)
             if value is not None:
                 params[attribute] = value
+        if hasattr(self, "detailed"):
+            params["detailed"] = self.detailed
         return utils._call_url_json(
             url, headers=self._am_auth_headers(), params=params, method=utils.METHOD_GET
         )
