@@ -4,15 +4,15 @@
 #
 #    pip-compile --allow-unsafe --output-file=requirements.txt pyproject.toml
 #
-certifi==2024.12.14
+certifi==2025.4.26
     # via requests
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
 idna==3.10
     # via requests
 requests==2.32.3
     # via amclient (pyproject.toml)
-urllib3==2.3.0
+urllib3==2.4.0
     # via
     #   amclient (pyproject.toml)
     #   requests
