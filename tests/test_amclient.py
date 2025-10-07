@@ -1,9 +1,13 @@
 import hashlib
 import json
 import os
+import sys
 import unittest
 import uuid
 from binascii import hexlify
+from collections.abc import Generator
+from typing import Any
+from typing import Optional
 from unittest import mock
 
 import pytest
@@ -3430,6 +3434,52 @@ def test_copy_metadata_files_with_empty_source_paths(call_url: mock.Mock):
             assume_json=True,
         )
     ]
+
+
+@pytest.fixture
+def recursion_limit() -> Generator[int, None, None]:
+    original_recursion_limit = sys.getrecursionlimit()
+    limit = 100
+    sys.setrecursionlimit(limit)
+
+    try:
+        yield limit
+    finally:
+        sys.setrecursionlimit(original_recursion_limit)
+
+
+def response_generator(page_count: int) -> Generator[dict[str, Any], None, None]:
+    for page_index in range(page_count):
+        next_page_url: Optional[str] = (
+            None
+            if page_index == page_count - 1
+            else f"/api/v2/file/?offset={page_index + 1}&package_type=AIP"
+        )
+
+        # Minimal mock response for testing get_all_packages().
+        yield {
+            "meta": {"next": next_page_url},
+            "objects": [{"uuid": f"uuid-{page_index}"}],
+        }
+
+
+@mock.patch("amclient.utils._call_url")
+def test_aips_paginates_beyond_recursion_limit(
+    call_url: mock.Mock, recursion_limit: int
+) -> None:
+    page_count = recursion_limit + 5
+    call_url.side_effect = response_generator(page_count)
+    expected_packages = [{"uuid": f"uuid-{index}"} for index in range(page_count)]
+    client = amclient.AMClient(
+        ss_url=SS_URL,
+        ss_user_name=SS_USER_NAME,
+        ss_api_key=SS_API_KEY,
+    )
+
+    packages = client.aips()
+
+    assert packages == expected_packages
+    assert call_url.call_count == page_count
 
 
 if __name__ == "__main__":

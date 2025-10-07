@@ -328,15 +328,22 @@ class AMClient:
         """
         if not packages:
             packages = []
-        if next_:
-            response = self.get_next_package_page(next_)
-        else:
-            response = self.get_package(params)
-        if not response:
-            raise Exception("Error connecting to the SS")
-        packages = packages + response["objects"]
-        if response["meta"]["next"]:
-            packages = self.get_all_packages(params, packages, response["meta"]["next"])
+
+        while True:
+            if next_:
+                response = self.get_next_package_page(next_)
+            else:
+                response = self.get_package(params)
+
+            if not response:
+                raise Exception("Error connecting to the SS")
+
+            packages.extend(response["objects"])
+
+            next_ = response["meta"]["next"]
+            if not next_:
+                break
+
         return packages
 
     def get_all_compressed_aips(self):
