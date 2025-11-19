@@ -48,16 +48,13 @@ Calling the module from Python:
 E.g.:
 
 ```python
-  Python 3.9.18 (main, Nov 14 2023, 15:21:53)
-  [GCC 11.4.0] on linux
-  Type "help", "copyright", "credits" or "license" for more information.
-  >>> from amclient import AMClient
-  >>> am = AMClient()
-  >>> am.ss_url = "http://127.0.0.1:62081"
-  >>> am.ss_user_name = "test"
-  >>> am.ss_api_key = "test"
-  >>> am.list_storage_locations()
-  ...json is output here...
+from amclient import AMClient
+am = AMClient()
+am.ss_url = "http://127.0.0.1:62081"
+am.ss_user_name = "test"
+am.ss_api_key = "test"
+am.list_storage_locations()
+# ...json is output here...
 ```
 
 ## CONTRIBUTING

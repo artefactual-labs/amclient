@@ -7,7 +7,6 @@ import uuid
 from binascii import hexlify
 from collections.abc import Generator
 from typing import Any
-from typing import Optional
 from unittest import mock
 
 import pytest
@@ -3450,7 +3449,7 @@ def recursion_limit() -> Generator[int, None, None]:
 
 def response_generator(page_count: int) -> Generator[dict[str, Any], None, None]:
     for page_index in range(page_count):
-        next_page_url: Optional[str] = (
+        next_page_url: str | None = (
             None
             if page_index == page_count - 1
             else f"/api/v2/file/?offset={page_index + 1}&package_type=AIP"
