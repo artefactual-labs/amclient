@@ -93,6 +93,21 @@ and HTTP 422 when the key is reused with different transfer parameters. Python
 callers can set `enhanced_errors=True` to inspect these responses through the
 returned error object's `status_code` and `message` attributes.
 
+## Python API status
+
+> [!NOTE]
+> `amclient` exposes a first-generation Python API that grew alongside the
+> Archivematica and Storage Service APIs. Its dynamic attribute-based
+> configuration, largely untyped return values, and legacy integer-based error
+> handling should not be considered the intended design for a future major
+> version.
+>
+> We welcome discussion and contributions toward a typed v2 client with explicit
+> operation inputs, consistent response and exception models, and a clearer
+> separation between library and CLI concerns. The [Archivematica API
+> specification] may also enable parts of the client's development to be
+> automated while keeping its implementation aligned with the API contract.
+
 ## CONTRIBUTING
 
 For information about contributing to this project please see the AMClient
@@ -101,3 +116,4 @@ For information about contributing to this project please see the AMClient
 [archivematica-api]: https://wiki.archivematica.org/Archivematica_API
 [storage-service-api]: https://wiki.archivematica.org/Storage_Service_API
 [contributing]: CONTRIBUTING.md
+[archivematica api specification]: https://github.com/archivematica/archivematica-api-specification
