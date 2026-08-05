@@ -34,11 +34,12 @@ PACKAGE_EXTENSIONS = (".tar",) + COMPRESS_EXTENSIONS
 
 class Error(int):
     """Subclass of int which accepts additional attributes. This allows specific
-    error messages to be passed through requests"""
+    error details to be passed through requests."""
 
     def __new__(cls, *args, **kwargs):
         i = int.__new__(cls, *args)
         i.message = kwargs.get("message")
+        i.status_code = kwargs.get("status_code")
         return i
 
     @classmethod
@@ -50,7 +51,11 @@ class Error(int):
             message = response.json()
         except requests.exceptions.JSONDecodeError:
             message = response.text
-        return Error(error_code, message=message)
+        return Error(
+            error_code,
+            message=message,
+            status_code=response.status_code,
+        )
 
 
 def _call_url(

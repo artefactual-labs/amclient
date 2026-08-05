@@ -49,6 +49,7 @@ E.g.:
 
 ```python
 from amclient import AMClient
+
 am = AMClient()
 am.ss_url = "http://127.0.0.1:62081"
 am.ss_user_name = "test"
@@ -56,6 +57,41 @@ am.ss_api_key = "test"
 am.list_storage_locations()
 # ...json is output here...
 ```
+
+## Idempotent transfer submission
+
+Archivematica can safely replay transfer submissions when the client supplies
+an idempotency key. The caller must choose a stable key and reuse it with the
+same transfer parameters for every retry:
+
+```python
+from amclient import AMClient
+
+am = AMClient(
+    am_url="http://127.0.0.1:62080",
+    am_user_name="test",
+    am_api_key="test",
+    transfer_directory="/path/to/transfer",
+    transfer_name="example-transfer",
+    transfer_type="standard",
+    processing_config="automated",
+    idempotency_key="workflow-123-transfer",
+)
+result = am.create_package()
+```
+
+The option is also available to the command-line client:
+
+```shell
+amclient create-package API_KEY /path/to/transfer \
+    --idempotency-key workflow-123-transfer
+```
+
+Archivematica accepts keys containing 1-255 visible ASCII characters without
+whitespace. It returns HTTP 409 while an identical request is still in progress
+and HTTP 422 when the key is reused with different transfer parameters. Python
+callers can set `enhanced_errors=True` to inspect these responses through the
+returned error object's `status_code` and `message` attributes.
 
 ## CONTRIBUTING
 

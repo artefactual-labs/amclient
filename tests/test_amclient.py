@@ -2372,6 +2372,101 @@ def test_create_package_endpoint(call_url: mock.Mock):
 
 
 @mock.patch(
+    "amclient.utils._call_url",
+    return_value={"id": "8e6259a0-34c8-4514-be3c-18dc0d42ce1c"},
+)
+def test_create_package_with_idempotency_key(call_url: mock.Mock):
+    path = "/archivematica/archivematica-sampledata/SampleTransfers/DemoTransfer"
+
+    response = amclient.AMClient(
+        am_api_key=AM_API_KEY,
+        am_user_name=AM_USER_NAME,
+        am_url=AM_URL,
+        transfer_directory=path,
+        transfer_name="amclient-transfer",
+        transfer_type="standard",
+        processing_config="automated",
+        idempotency_key="workflow-123-transfer",
+    ).create_package()
+
+    assert response == {"id": "8e6259a0-34c8-4514-be3c-18dc0d42ce1c"}
+    call_url.assert_called_once_with(
+        f"{AM_URL}/api/v2beta/package/",
+        method="POST",
+        data=json.dumps(
+            {
+                "name": "amclient-transfer",
+                "path": "L2FyY2hpdmVtYXRpY2EvYXJjaGl2ZW1hdGljYS1zYW1wbGVkYXRhL1NhbXBsZVRyYW5zZmVycy9EZW1vVHJhbnNmZXI=",
+                "type": "standard",
+                "processing_config": "automated",
+            }
+        ),
+        headers={
+            "Authorization": f"ApiKey {AM_USER_NAME}:{AM_API_KEY}",
+            "Idempotency-Key": "workflow-123-transfer",
+        },
+        assume_json=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "status_code,message",
+    [
+        (
+            409,
+            "A request with this idempotency key is still in progress.",
+        ),
+        (
+            422,
+            "Idempotency key has already been used with a different request.",
+        ),
+    ],
+)
+@mock.patch("amclient.utils._call_url")
+def test_create_package_preserves_idempotency_error(
+    call_url: mock.Mock, status_code: int, message: str
+):
+    payload = {"error": True, "message": message}
+    http_response = mock.Mock(
+        status_code=status_code,
+        reason="Conflict",
+        text=json.dumps(payload),
+    )
+    http_response.json.return_value = payload
+    call_url.side_effect = requests.exceptions.HTTPError(response=http_response)
+
+    response = amclient.AMClient(
+        am_api_key=AM_API_KEY,
+        am_user_name=AM_USER_NAME,
+        am_url=AM_URL,
+        transfer_directory="/path/to/transfer",
+        transfer_name="amclient-transfer",
+        transfer_type="standard",
+        processing_config="automated",
+        idempotency_key="workflow-123-transfer",
+        enhanced_errors=True,
+    ).create_package()
+
+    assert response == errors.ERR_INVALID_RESPONSE
+    assert response.status_code == status_code
+    assert response.message == payload
+
+
+def test_create_package_cli_accepts_idempotency_key():
+    args = amclient.amclientargs.get_parser().parse_args(
+        [
+            "create-package",
+            AM_API_KEY,
+            "/path/to/transfer",
+            "--idempotency-key",
+            "workflow-123-transfer",
+        ]
+    )
+
+    assert args.idempotency_key == "workflow-123-transfer"
+
+
+@mock.patch(
     "requests.get",
     side_effect=[
         mock.Mock(
