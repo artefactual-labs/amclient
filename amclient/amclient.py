@@ -120,6 +120,7 @@ class AMClient:
         param: pipeline_uuids
         param: ss_user_id
         param: ss_user_email
+        param: idempotency_key
         """
         for key, val in kwargs.items():
             setattr(self, key, val)
@@ -662,7 +663,11 @@ class AMClient:
         )
 
     def create_package(self):
-        """Create a transfer using the new API v2 package endpoint."""
+        """Create a transfer using the new API v2 package endpoint.
+
+        Set ``idempotency_key`` to a stable caller-supplied value and reuse it
+        with the same transfer parameters when retrying a request.
+        """
         url = f"{self.am_url}/api/v2beta/package/"
         transfer_source = getattr(self, "transfer_source", None)
         if not transfer_source:
@@ -676,11 +681,16 @@ class AMClient:
             "type": self.transfer_type,
             "processing_config": self.processing_config,
         }
+        headers = self._am_auth_headers()
+        idempotency_key = getattr(self, "idempotency_key", None)
+        if idempotency_key is not None:
+            headers["Idempotency-Key"] = idempotency_key
         return utils._call_url_json(
             url,
-            headers=self._am_auth_headers(),
+            headers=headers,
             params=json.dumps(params),
             method=utils.METHOD_POST,
+            enhanced_errors=getattr(self, "enhanced_errors", False),
         )
 
     def validate_csv(self, validator, file_obj):

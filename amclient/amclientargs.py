@@ -152,6 +152,13 @@ TRANSFER_NAME = Opt(
     default="amclient-transfer",
     type=None,
 )
+IDEMPOTENCY_KEY = Opt(
+    name="idempotency-key",
+    metavar="KEY",
+    help="Stable key used to make retries of this transfer idempotent",
+    default=None,
+    type=None,
+)
 JOB_MICROSERVICE = Opt(
     name="job-microservice",
     metavar="JOBMICROSERVICE",
@@ -345,6 +352,7 @@ SUBCOMMANDS = (
             TRANSFER_NAME,
             TRANSFER_TYPE,
             PROCESSING_CONFIG,
+            IDEMPOTENCY_KEY,
             OUTPUT_MODE,
         ),
     ),
