@@ -826,6 +826,7 @@ def main():
         argparser.print_help()
         sys.exit(0)
     args = argparser.parse_args()
+    args.log_file = loggingconfig.get_log_file_name(args.log_file)
     loggingconfig.setup(args.log_level, args.log_file)
     am_client = AMClient(**vars(args))
     try:

@@ -1,7 +1,5 @@
 # Defaults and constants for amclient.py and transfers.py
-import os
 import re
-from tempfile import mkdtemp
 
 DEF_AM_URL = "http://127.0.0.1:62080"
 DEF_SS_URL = "http://127.0.0.1:62081"
@@ -14,9 +12,6 @@ UNDEC_MSG = (
     "Unable to decode a transfer source component; giving up and"
     f" returning {UNDECODABLE}"
 )
-
-# Global for logfile if not set.
-AMCLIENT_LOG_FILE = os.path.join(mkdtemp(), "amclient.log")
 
 # Default log level.
 DEFAULT_LOG_LEVEL = "INFO"

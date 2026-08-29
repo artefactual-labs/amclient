@@ -1,4 +1,13 @@
 import logging.config  # Has to be imported separately
+import os
+from tempfile import mkdtemp
+
+
+def get_log_file_name(log_file_name):
+    """Return the configured log path, creating a default directory if needed."""
+    if log_file_name is None:
+        return os.path.join(mkdtemp(), "amclient.log")
+    return log_file_name
 
 
 def setup(log_level, log_file_name):
