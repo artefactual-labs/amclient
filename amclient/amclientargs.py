@@ -404,9 +404,7 @@ def get_parser():
         description="Archivematica Client",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument(
-        "--log-file", metavar="FILE", help="logfile", default=defaults.AMCLIENT_LOG_FILE
-    )
+    parser.add_argument("--log-file", metavar="FILE", help="logfile")
     parser.add_argument(
         "--log-level",
         choices=["ERROR", "WARNING", "INFO", "DEBUG"],
