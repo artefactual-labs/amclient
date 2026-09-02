@@ -14,8 +14,7 @@
 *.log.[0-9]
 *.log
 
-# Tox files
-.tox/
+.venv/
 
 # Build output
 build/
@@ -23,3 +22,4 @@ dist/
 *.egg-info/
 
 .coverage
+coverage.xml
