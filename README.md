@@ -1,7 +1,7 @@
 # amclient
 
 [![GitHub CI](https://github.com/artefactual-labs/amclient/actions/workflows/test.yml/badge.svg)](https://github.com/artefactual-labs/amclient/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/artefactual-labs/amclient/branch/master/graph/badge.svg?token=hJLGYzoJUo)](https://codecov.io/gh/artefactual-labs/amclient)
+[![codecov](https://codecov.io/gh/artefactual-labs/amclient/branch/main/graph/badge.svg?token=hJLGYzoJUo)](https://codecov.io/gh/artefactual-labs/amclient)
 
 AMClient is an Archivematica API client library and Python package for making
 it easier to talk to Archivematica from your Python scripts. AMClient also acts
